@@ -9,6 +9,7 @@ import CalculationPage from "./pages/CalculationPage";
 import MyCalculationsPage from "./pages/MyCalculationsPage";
 import ProfilePage from "./pages/ProfilePage";
 import JournalPage from "./pages/JournalPage";
+import ModeratorPage from "./pages/ModeratorPage";
 import { ROUTES } from "./Routes";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path={ROUTES.MY_CALCULATIONS} element={<MyCalculationsPage />} />
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.JOURNAL} element={<JournalPage />} />
+        <Route path={ROUTES.MODERATOR} element={<ModeratorPage />} />
         <Route path={`${ROUTES.CALCULATION}/:id`} element={<CalculationPage />} />
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
       </Routes>

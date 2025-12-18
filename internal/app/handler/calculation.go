@@ -624,6 +624,11 @@ func (h *Handler) ApiMMDelete(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
+type apiMMUpdateResultReq struct {
+	FinalPressure float64 `json:"final_pressure" binding:"required"`
+	AuthToken     string  `json:"auth_token" binding:"required"`
+}
+
 type apiMMUpdateReq struct {
 	Sound              *bool    `json:"sound"`
 	Quantity           *int     `json:"quantity"`
@@ -730,6 +735,53 @@ func (h *Handler) ApiMMUpdate(ctx *gin.Context) {
 			h.errorHandler(ctx, http.StatusInternalServerError, err)
 			return
 		}
+	}
+
+	ctx.Status(http.StatusNoContent)
+}
+
+// ApiMMUpdateResult godoc
+// @Summary Update gas calculation result from async service
+// @Description Update final_pressure from async calculation service (requires auth token)
+// @Tags Calculations
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "GasCalculation ID"
+// @Param request body apiMMUpdateResultReq true "Result data with auth token"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/mm/gas/{id}/result [put]
+func (h *Handler) ApiMMUpdateResult(ctx *gin.Context) {
+	gasCalculationIDU64, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	var req apiMMUpdateResultReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	// Проверка токена авторизации (8 байт = 16 символов hex)
+	const AUTH_TOKEN = "a1b2c3d4e5f6g7h8"
+	if req.AuthToken != AUTH_TOKEN {
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("invalid auth token"))
+		return
+	}
+
+	// Обновляем только final_pressure
+	params := map[string]interface{}{
+		"final_pressure": req.FinalPressure,
+	}
+
+	if err := h.Repository.UpdateGasCalculationParams(uint(gasCalculationIDU64), params); err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
 	}
 
 	ctx.Status(http.StatusNoContent)

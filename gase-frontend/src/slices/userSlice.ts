@@ -78,7 +78,7 @@ export const loginUserAsync = createAsyncThunk(
       });
       
       // Сохраняем токен в localStorage для последующих запросов
-      if (response.data.access_token) {я
+      if (response.data.access_token) {
         localStorage.setItem('auth_token', response.data.access_token);
       }
       
@@ -319,7 +319,10 @@ const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(getUserProfileAsync.fulfilled, (state, action) => {
-        state.profile = action.payload;
+        state.profile = {
+          ...action.payload,
+          role: action.payload.role,
+        };
         state.username = action.payload.login || '';
         state.name = action.payload.name || '';
         state.email = action.payload.email || '';

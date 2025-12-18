@@ -120,7 +120,7 @@ func (h *Handler) RegisterAPI(router *gin.Engine) {
 	api.GET("/minio/*path", h.ProxyMinIOImage) // Проксирование изображений MinIO
 	api.POST("/auth/register", h.ApiRegister)
 	api.POST("/auth/login", h.ApiLogin)
-	
+
 	// Эндпоинты с опциональной аутентификацией (используют токен если есть)
 	optionalAuth := api.Group("")
 	optionalAuth.Use(h.AuthMiddleware()) // Пытается получить токен, но не требует его
@@ -157,10 +157,13 @@ func (h *Handler) RegisterAPI(router *gin.Engine) {
 		protected.DELETE("/calculations/:id", h.ApiDeleteCalculation)
 		protected.POST("/calculations/:id/submit", h.ApiSubmitCalculation)
 		protected.PUT("/calculations/:id/complete", h.ApiCompleteCalculation)
-		
+
 		// Управление газами в расчетах (GasCalculation)
 		protected.DELETE("/mm/gas/:id", h.ApiMMDelete)
 		protected.PUT("/mm/gas/:id", h.ApiMMUpdate)
+
+		// Эндпоинт для приема результатов от асинхронного сервиса
+		protected.PUT("/mm/gas/:id/result", h.ApiMMUpdateResult)
 	}
 
 	// Модераторские эндпоинты

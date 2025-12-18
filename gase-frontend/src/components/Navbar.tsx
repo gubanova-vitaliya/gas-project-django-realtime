@@ -20,6 +20,8 @@ export const AppNavbar: FC = () => {
 
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const username = useSelector((state: RootState) => state.user.username);
+  const userProfile = useSelector((state: RootState) => state.user.profile);
+  const isModerator = userProfile?.role === 'manager' || userProfile?.role === 'admin';
 
   // Обработчик выхода
   const handleExit = async () => {
@@ -53,6 +55,11 @@ export const AppNavbar: FC = () => {
             {isAuthenticated && (
               <Nav.Link as={Link} to={ROUTES.MY_CALCULATIONS}>
                 {ROUTE_LABELS.MY_CALCULATIONS}
+              </Nav.Link>
+            )}
+            {isAuthenticated && isModerator && (
+              <Nav.Link as={Link} to={ROUTES.MODERATOR}>
+                {ROUTE_LABELS.MODERATOR}
               </Nav.Link>
             )}
           </Nav>

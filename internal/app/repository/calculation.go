@@ -2,8 +2,12 @@ package repository
 
 import (
 	"WEB/internal/app/ds"
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -331,10 +335,13 @@ func (r *Repository) ListCalculations(status string, dateFrom string, dateTo str
 		q = q.Where("calculations.status = ?", status)
 	}
 	if dateFrom != "" {
-		q = q.Where("calculations.date_form >= ?", dateFrom)
+		// Фильтрация по дате формирования (только дата, без времени)
+		// Добавляем начало дня для dateFrom
+		q = q.Where("DATE(calculations.date_form) >= ?", dateFrom)
 	}
 	if dateTo != "" {
-		q = q.Where("calculations.date_form <= ?", dateTo)
+		// Добавляем конец дня для dateTo
+		q = q.Where("DATE(calculations.date_form) <= ?", dateTo)
 	}
 
 	var results []struct {
@@ -448,28 +455,75 @@ func (r *Repository) SubmitCalculation(id uint, creatorID uint) error {
 	}).Error
 }
 
-// CompleteCalculation завершает расчет с вычислением давления
+// CompleteCalculation завершает расчет, отправляя задачи в асинхронный сервис
 func (r *Repository) CompleteCalculation(id uint, moderatorID uint) error {
 	var c ds.Calculation
-	if err := r.db.First(&c, id).Error; err != nil {
+	if err := r.db.Preload("Gases").First(&c, id).Error; err != nil {
 		return err
 	}
 	if c.Status != "formed" {
 		return errors.New("only formed can be completed")
 	}
 
-	// Расчет конечного давления для всех газов
-	_, err := r.CalculateAllGases(id)
-	if err != nil {
-		return err
+	// Отправляем задачи на расчет для каждого газа в асинхронный сервис
+	asyncServiceURL := "http://localhost:8001" // URL асинхронного сервиса
+
+	for _, gasCalc := range c.Gases {
+		// Проверяем, что все необходимые параметры заполнены
+		if gasCalc.GasAmount.Valid && gasCalc.FinalTemperature.Valid && gasCalc.Volume.Valid &&
+			gasCalc.GasAmount.Float64 > 0 && gasCalc.FinalTemperature.Float64 > 0 && gasCalc.Volume.Float64 > 0 {
+
+			// Формируем запрос к асинхронному сервису
+			requestData := map[string]interface{}{
+				"gas_calc_id":         gasCalc.ID,
+				"initial_pressure":    nullFloat64ToFloat(gasCalc.InitialPressure),
+				"initial_temperature": nullFloat64ToFloat(gasCalc.InitialTemperature),
+				"final_temperature":   gasCalc.FinalTemperature.Float64,
+				"volume":              gasCalc.Volume.Float64,
+				"gas_amount":          gasCalc.GasAmount.Float64,
+			}
+
+			jsonData, err := json.Marshal(requestData)
+			if err != nil {
+				logrus.Errorf("Error marshaling request data: %v", err)
+				continue
+			}
+
+			// Отправляем POST-запрос к асинхронному сервису
+			resp, err := http.Post(
+				fmt.Sprintf("%s/", asyncServiceURL),
+				"application/json",
+				bytes.NewBuffer(jsonData),
+			)
+			if err != nil {
+				logrus.Errorf("Error sending request to async service: %v", err)
+				continue
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				logrus.Errorf("Async service returned status %d for gas_calc_id %d", resp.StatusCode, gasCalc.ID)
+			} else {
+				logrus.Infof("Successfully sent calculation task for gas_calc_id %d to async service", gasCalc.ID)
+			}
+		}
 	}
 
+	// Обновляем статус заявки на "completed" сразу (расчеты будут выполнены асинхронно)
 	now := time.Now()
 	return r.db.Model(&ds.Calculation{}).Where("id = ?", id).Updates(map[string]interface{}{
 		"status":        "completed",
 		"moderator_id":  moderatorID,
 		"date_complete": now, // Устанавливаем дату завершения
 	}).Error
+}
+
+// Helper function для преобразования sql.NullFloat64 в float64
+func nullFloat64ToFloat(nf sql.NullFloat64) *float64 {
+	if nf.Valid {
+		return &nf.Float64
+	}
+	return nil
 }
 
 // RejectCalculation отклоняет расчет

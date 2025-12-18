@@ -7,6 +7,7 @@ export const ROUTES = {
   MY_CALCULATIONS: "/my-calculations",
   PROFILE: "/profile",
   JOURNAL: "/journal",
+  MODERATOR: "/moderator",
 };
 
 export type RouteKeyType = keyof typeof ROUTES;
@@ -20,6 +21,7 @@ export const ROUTE_LABELS: { [key in RouteKeyType]: string } = {
   MY_CALCULATIONS: "Мои заявки",
   PROFILE: "Профиль",
   JOURNAL: "Журнал расчетов",
+  MODERATOR: "Панель модератора",
 };
 
 
