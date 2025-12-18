@@ -463,7 +463,9 @@ const CalculationPage: FC = () => {
                               <label>Нач. давление (атм)</label>
                               <div className="result-display">
                                 <span className="final-pressure-value">
-                                  {item.initial_pressure ?? 'Не указано'}
+                                  {item.initial_pressure !== null && item.initial_pressure !== undefined 
+                                    ? Number(item.initial_pressure).toFixed(4) 
+                                    : 'Не указано'}
                                 </span>
                               </div>
                             </div>
@@ -472,7 +474,9 @@ const CalculationPage: FC = () => {
                               <label>Нач. темп. (К)</label>
                               <div className="result-display">
                                 <span className="final-pressure-value">
-                                  {item.initial_temperature ?? 'Не указано'}
+                                  {item.initial_temperature !== null && item.initial_temperature !== undefined 
+                                    ? Number(item.initial_temperature).toFixed(2) 
+                                    : 'Не указано'}
                                 </span>
                               </div>
                             </div>
@@ -481,7 +485,9 @@ const CalculationPage: FC = () => {
                               <label>Кон. темп. (К)</label>
                               <div className="result-display">
                                 <span className="final-pressure-value">
-                                  {item.final_temperature ?? 'Не указано'}
+                                  {item.final_temperature !== null && item.final_temperature !== undefined 
+                                    ? Number(item.final_temperature).toFixed(2) 
+                                    : 'Не указано'}
                                 </span>
                               </div>
                             </div>
@@ -490,7 +496,22 @@ const CalculationPage: FC = () => {
                               <label>Объем (м³)</label>
                               <div className="result-display">
                                 <span className="final-pressure-value">
-                                  {item.final_volume ?? 'Не указано'}
+                                  {item.volume !== null && item.volume !== undefined 
+                                    ? Number(item.volume).toFixed(4) 
+                                    : (item.final_volume !== null && item.final_volume !== undefined 
+                                        ? Number(item.final_volume).toFixed(4) 
+                                        : 'Не указано')}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="param-group">
+                              <label>Кол-во в-ва (моль)</label>
+                              <div className="result-display">
+                                <span className="final-pressure-value">
+                                  {item.gas_amount !== null && item.gas_amount !== undefined 
+                                    ? Number(item.gas_amount).toFixed(4) 
+                                    : 'Не указано'}
                                 </span>
                               </div>
                             </div>

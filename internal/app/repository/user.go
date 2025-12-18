@@ -46,7 +46,7 @@ func (r *Repository) GetUserCalculations(userUUID string) ([]ds.Calculation, err
 
 	var calculations []ds.Calculation
 	err := r.db.
-		Preload("Gases"). // Загружаем связанные газы
+		Preload("Gases").     // Загружаем связанные газы
 		Preload("Gases.Gas"). // Загружаем данные самих газов
 		Where("creator_id = ?", user.ID).
 		Where("status <> ?", "draft"). // Исключаем черновики из списка "Мои заявки" (но включаем "deleted" и "formed")

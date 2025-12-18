@@ -190,12 +190,6 @@ const MyCalculationsPage: FC = () => {
       ) : (
         <div className="calculations-list">
           {filteredCalculations.map((calc) => {
-            const totalGases = calc.gases ? calc.gases.length : 0;
-            const calculatedGases =
-              calc.gases?.filter(
-                (g: any) => g.final_pressure !== null && g.final_pressure !== undefined
-              ).length || 0;
-
             return (
               <Card
                 key={calc.id}
@@ -227,59 +221,49 @@ const MyCalculationsPage: FC = () => {
                   <Card.Text>
                     <strong>Дата создания:</strong> {formatDate(calc.date_create)}
                   </Card.Text>
-                  {totalGases > 0 && (
-                    <Card.Text>
-                      <strong>Результат по газам:</strong>{' '}
-                      {calculatedGases} из {totalGases} рассчитано
-                    </Card.Text>
-                  )}
+                  
+                  {/* Отображение сохраненных данных для расчета по каждому газу */}
                   {calc.gases && calc.gases.length > 0 && (
                     <div className="mt-3">
-                      <strong>Газы в заявке:</strong>
                       {calc.gases.map((gasCalc: any, index: number) => (
-                        <Card key={gasCalc.id || index} className="mt-2 ms-3" style={{ backgroundColor: '#f8f9fa' }}>
-                          <Card.Body>
-                            <div className="gas-item-header">
-                              <strong>#{gasCalc.position || index + 1}. {gasCalc.gas?.title || 'Неизвестный газ'}</strong>
-                              <span className="ms-2">({gasCalc.gas?.formula || '-'})</span>
-                            </div>
-                            {gasCalc.gas?.molar_mass && (
-                              <div className="mt-2">
-                                <strong>Молярная масса:</strong> {gasCalc.gas.molar_mass.toFixed(2)} г/моль
-                              </div>
-                            )}
+                        <div key={gasCalc.id || index} className="mb-3 p-3" style={{ backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+                          <div className="mb-2">
+                            <strong>Газ #{gasCalc.position || index + 1}: {gasCalc.gas?.title || 'Неизвестный газ'}</strong>
+                            {gasCalc.gas?.formula && <span className="ms-2 text-muted">({gasCalc.gas.formula})</span>}
+                          </div>
+                          <div className="row">
                             {(gasCalc.initial_pressure !== null && gasCalc.initial_pressure !== undefined) && (
-                              <div className="mt-1">
-                                <strong>Начальное давление:</strong> {gasCalc.initial_pressure.toFixed(4)} атм
+                              <div className="col-md-6 mb-2">
+                                <strong>Нач. давление:</strong> {Number(gasCalc.initial_pressure).toFixed(4)} атм
                               </div>
                             )}
                             {(gasCalc.initial_temperature !== null && gasCalc.initial_temperature !== undefined) && (
-                              <div className="mt-1">
-                                <strong>Начальная температура:</strong> {gasCalc.initial_temperature.toFixed(2)} К
+                              <div className="col-md-6 mb-2">
+                                <strong>Нач. темп.:</strong> {Number(gasCalc.initial_temperature).toFixed(2)} К
                               </div>
                             )}
                             {(gasCalc.final_temperature !== null && gasCalc.final_temperature !== undefined) && (
-                              <div className="mt-1">
-                                <strong>Конечная температура:</strong> {gasCalc.final_temperature.toFixed(2)} К
+                              <div className="col-md-6 mb-2">
+                                <strong>Кон. темп.:</strong> {Number(gasCalc.final_temperature).toFixed(2)} К
                               </div>
                             )}
                             {(gasCalc.volume !== null && gasCalc.volume !== undefined) && (
-                              <div className="mt-1">
-                                <strong>Объем:</strong> {gasCalc.volume.toFixed(4)} м³
+                              <div className="col-md-6 mb-2">
+                                <strong>Объем:</strong> {Number(gasCalc.volume).toFixed(4)} м³
                               </div>
                             )}
                             {(gasCalc.gas_amount !== null && gasCalc.gas_amount !== undefined) && (
-                              <div className="mt-1">
-                                <strong>Количество вещества:</strong> {gasCalc.gas_amount.toFixed(4)} моль
+                              <div className="col-md-6 mb-2">
+                                <strong>Кол-во в-ва:</strong> {Number(gasCalc.gas_amount).toFixed(4)} моль
                               </div>
                             )}
                             {(gasCalc.final_pressure !== null && gasCalc.final_pressure !== undefined) && (
-                              <div className="mt-1">
-                                <strong>Финальное давление:</strong> {gasCalc.final_pressure.toFixed(4)} атм
+                              <div className="col-md-6 mb-2">
+                                <strong>Финальное давление:</strong> {Number(gasCalc.final_pressure).toFixed(4)} атм
                               </div>
                             )}
-                          </Card.Body>
-                        </Card>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}

@@ -80,10 +80,10 @@ func (r *Repository) UpdateGasCalculationParams(gasCalculationID uint, params ma
 		logrus.Errorf("Gas calculation not found: ID %d, error: %v", gasCalculationID, err)
 		return err
 	}
-	
+
 	// Обновляем поля напрямую в структуре
 	hasUpdates := false
-	
+
 	// Вспомогательная функция для преобразования значения в sql.NullFloat64
 	toNullFloat64 := func(value interface{}) (sql.NullFloat64, bool) {
 		switch v := value.(type) {
@@ -102,7 +102,7 @@ func (r *Repository) UpdateGasCalculationParams(gasCalculationID uint, params ma
 		}
 		return sql.NullFloat64{}, false
 	}
-	
+
 	// Обновляем числовые поля
 	if val, ok := params["initial_pressure"]; ok {
 		if nullVal, ok2 := toNullFloat64(val); ok2 {
@@ -147,7 +147,7 @@ func (r *Repository) UpdateGasCalculationParams(gasCalculationID uint, params ma
 			hasUpdates = true
 		}
 	}
-	
+
 	// Обновляем нечисловые поля
 	if val, ok := params["sound"]; ok {
 		if boolVal, ok2 := val.(bool); ok2 {
@@ -167,12 +167,12 @@ func (r *Repository) UpdateGasCalculationParams(gasCalculationID uint, params ma
 			hasUpdates = true
 		}
 	}
-	
+
 	if !hasUpdates {
 		logrus.Warnf("No updates to apply for gas calculation ID: %d", gasCalculationID)
 		return nil
 	}
-	
+
 	logrus.Infof("Updating gas calculation ID %d", gasCalculationID)
 	// Используем Updates с Select для обновления только измененных полей
 	// Это более безопасно, чем Save(), который обновляет все поля
@@ -204,12 +204,12 @@ func (r *Repository) UpdateGasCalculationParams(gasCalculationID uint, params ma
 	if params["position"] != nil {
 		updates["position"] = gasCalc.Position
 	}
-	
+
 	fields := make([]string, 0, len(updates))
 	for key := range updates {
 		fields = append(fields, key)
 	}
-	
+
 	err := r.db.Model(&ds.GasCalculation{}).
 		Select(fields).
 		Where("id = ?", gasCalculationID).
@@ -253,6 +253,32 @@ func (r *Repository) GetDraftCalculation(creatorID uint) (*ds.Calculation, error
 	}
 
 	return &calculation, nil
+}
+
+// GetCalculationNumber возвращает номер заявки для пользователя (начинается с 1)
+// Подсчитывает все заявки пользователя (не черновики), отсортированные по дате создания и ID
+func (r *Repository) GetCalculationNumber(creatorID uint, calculationID uint) (int, error) {
+	// Получаем все заявки пользователя (не черновики), отсортированные по дате создания и ID
+	var allCalculations []ds.Calculation
+	err := r.db.Unscoped().
+		Where("creator_id = ? AND status <> ?", creatorID, "draft").
+		Order("date_create ASC, id ASC").
+		Find(&allCalculations).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	// Находим позицию текущей заявки в отсортированном списке
+	for i, calc := range allCalculations {
+		if calc.ID == calculationID {
+			// Возвращаем номер (начинается с 1)
+			return i + 1, nil
+		}
+	}
+
+	// Если заявка не найдена, возвращаем 0
+	return 0, errors.New("calculation not found")
 }
 
 // CalculateAllGases рассчитывает все газы в расчете

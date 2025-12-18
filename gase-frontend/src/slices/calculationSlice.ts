@@ -14,10 +14,12 @@ interface GasInCalculation {
   // Поля для расчета финального давления
   initial_pressure?: number | null; // P1 - начальное давление (Па)
   initial_volume?: number | null; // V1 - начальный объем (м³)
+  volume?: number | null; // Объем (м³)
   initial_temperature?: number | null; // T1 - начальная температура (К)
   final_volume?: number | null; // V2 - конечный объем (м³)
   final_temperature?: number | null; // T2 - конечная температура (К)
   final_pressure?: number | null; // P2 - финальное давление (рассчитанное)
+  gas_amount?: number | null; // Количество вещества (моль)
   calculated?: boolean; // Флаг, что расчет выполнен
 }
 
