@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <!-- Фон с градиентом -->
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a237e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#283593;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3949ab;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Фоновый прямоугольник -->
+  <rect width="800" height="500" fill="url(#bg1)"/>
+  
+  <!-- Молекула H₂ (Водород) -->
+  <g transform="translate(150, 200)">
+    <!-- Связь -->
+    <line x1="0" y1="50" x2="100" y2="50" stroke="#4fc3f7" stroke-width="4" opacity="0.8"/>
+    <!-- Атомы водорода -->
+    <circle cx="0" cy="50" r="30" fill="#4fc3f7" filter="url(#glow)"/>
+    <circle cx="100" cy="50" r="30" fill="#4fc3f7" filter="url(#glow)"/>
+    <text x="0" y="60" text-anchor="middle" fill="white" font-size="20" font-weight="bold">H</text>
+    <text x="100" y="60" text-anchor="middle" fill="white" font-size="20" font-weight="bold">H</text>
+    <text x="50" y="120" text-anchor="middle" fill="#81d4fa" font-size="16" font-weight="bold">H₂</text>
+  </g>
+  
+  <!-- Молекула O₂ (Кислород) -->
+  <g transform="translate(350, 180)">
+    <!-- Двойная связь -->
+    <line x1="0" y1="50" x2="100" y2="50" stroke="#ef5350" stroke-width="4" opacity="0.8"/>
+    <line x1="0" y1="60" x2="100" y2="60" stroke="#ef5350" stroke-width="4" opacity="0.8"/>
+    <!-- Атомы кислорода -->
+    <circle cx="0" cy="55" r="35" fill="#ef5350" filter="url(#glow)"/>
+    <circle cx="100" cy="55" r="35" fill="#ef5350" filter="url(#glow)"/>
+    <text x="0" y="65" text-anchor="middle" fill="white" font-size="22" font-weight="bold">O</text>
+    <text x="100" y="65" text-anchor="middle" fill="white" font-size="22" font-weight="bold">O</text>
+    <text x="50" y="120" text-anchor="middle" fill="#ff8a80" font-size="16" font-weight="bold">O₂</text>
+  </g>
+  
+  <!-- Молекула N₂ (Азот) -->
+  <g transform="translate(550, 200)">
+    <!-- Тройная связь -->
+    <line x1="0" y1="50" x2="100" y2="50" stroke="#66bb6a" stroke-width="4" opacity="0.8"/>
+    <line x1="0" y1="55" x2="100" y2="55" stroke="#66bb6a" stroke-width="4" opacity="0.8"/>
+    <line x1="0" y1="60" x2="100" y2="60" stroke="#66bb6a" stroke-width="4" opacity="0.8"/>
+    <!-- Атомы азота -->
+    <circle cx="0" cy="55" r="32" fill="#66bb6a" filter="url(#glow)"/>
+    <circle cx="100" cy="55" r="32" fill="#66bb6a" filter="url(#glow)"/>
+    <text x="0" y="63" text-anchor="middle" fill="white" font-size="20" font-weight="bold">N</text>
+    <text x="100" y="63" text-anchor="middle" fill="white" font-size="20" font-weight="bold">N</text>
+    <text x="50" y="120" text-anchor="middle" fill="#a5d6a7" font-size="16" font-weight="bold">N₂</text>
+  </g>
+  
+  <!-- Орбитали электронов (декоративные) -->
+  <circle cx="200" cy="100" r="60" fill="none" stroke="#4fc3f7" stroke-width="2" opacity="0.3" stroke-dasharray="5,5"/>
+  <circle cx="400" cy="80" r="70" fill="none" stroke="#ef5350" stroke-width="2" opacity="0.3" stroke-dasharray="5,5"/>
+  <circle cx="600" cy="100" r="65" fill="none" stroke="#66bb6a" stroke-width="2" opacity="0.3" stroke-dasharray="5,5"/>
+  
+  <!-- Заголовок -->
+  <text x="400" y="80" text-anchor="middle" fill="white" font-size="42" font-weight="bold" font-family="Arial, sans-serif">Каталог Газов</text>
+  <text x="400" y="120" text-anchor="middle" fill="#b0bec5" font-size="20" font-family="Arial, sans-serif">Молекулы H₂, O₂, N₂</text>
+  
+  <!-- Декоративные частицы -->
+  <circle cx="100" cy="350" r="3" fill="#4fc3f7" opacity="0.6"/>
+  <circle cx="250" cy="380" r="2" fill="#ef5350" opacity="0.6"/>
+  <circle cx="500" cy="360" r="4" fill="#66bb6a" opacity="0.6"/>
+  <circle cx="650" cy="390" r="3" fill="#4fc3f7" opacity="0.6"/>
+  <circle cx="720" cy="350" r="2" fill="#ef5350" opacity="0.6"/>
+</svg>

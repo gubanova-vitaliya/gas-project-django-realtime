@@ -1,0 +1,18 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="h2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#90caf9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#h2Grad)"/>
+  <text x="150" y="80" font-family="Arial, sans-serif" font-size="48" fill="#1976d2" text-anchor="middle" font-weight="bold">H₂</text>
+  <text x="150" y="120" font-family="Arial, sans-serif" font-size="20" fill="#1565c0" text-anchor="middle">Водород</text>
+  <text x="150" y="150" font-family="Arial, sans-serif" font-size="14" fill="#0d47a1" text-anchor="middle">2.016 г/моль</text>
+</svg>
+
+
+
+
+
+

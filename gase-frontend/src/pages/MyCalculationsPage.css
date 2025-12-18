@@ -1,0 +1,54 @@
+.my-calculations-page {
+  padding: 20px;
+  max-width: 1200px;
+}
+
+.page-title {
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.no-calculations {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-calculations p {
+  font-size: 1.2rem;
+}
+
+.calculations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.calculation-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.calculation-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.gas-item-header {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.gas-item-header strong {
+  color: #007bff;
+}
+

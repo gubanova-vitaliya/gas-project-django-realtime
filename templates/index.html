@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог газов</title>
+    <link rel="stylesheet" href="/static/styles/index_style.css">
+</head>
+<body>
+<header>
+    <a href="/gas" class="home-btn">🏠 Домой</a>
+</header>
+
+<main>
+    <div class="page-header">
+        <h1>Каталог газов</h1>
+        {{if gt .cart_count 0}}
+        <a href="/journal" class="cart-link active">
+            <span class="cart-icon">📋</span>
+            Журнал расчетов
+            <span class="cart-count">{{.cart_count}}</span>
+        </a>
+        {{else}}
+        <a href="#" class="cart-link inactive">
+            <span class="cart-icon">📋</span>
+            Журнал расчетов
+            <span class="cart-count">0</span>
+        </a>
+        {{end}}
+    </div>
+
+    {{if .message}}
+    <div class="message-container">
+        {{if eq .message "added"}}
+        <div class="success-message">
+            ✅ Газ успешно добавлен в расчеты!
+        </div>
+        {{end}}
+    </div>
+    {{end}}
+
+    <form method="get" action="/gas" class="search-form">
+        <input type="text" name="search" placeholder="Поиск газа..." value="{{.search}}">
+        <button type="submit">🔍 Поиск газа</button>
+    </form>
+
+    <div class="grid">
+        {{range .gases}}
+        <div class="card">
+            <h2>{{.Title}}</h2>
+            {{if .ImageURL}}
+            <img src="{{.ImageURL}}" alt="{{.Title}}" width="150">
+            {{else}}
+            <div style="background: #ddd; width:150px; height:150px; display:flex; align-items:center; justify-content:center;">
+                No image
+            </div>
+            {{end}}
+            <p><strong>Формула:</strong> {{.Formula}}</p>
+            <p><strong>Молярная масса:</strong> {{printf "%.2f" .MolarMass}} г/моль</p>
+            <p><strong>Описание:</strong> {{.Description}}</p>
+            <p><strong>ID:</strong> {{.ID}}</p>
+            <a href="/gas/{{.ID}}" class="yellow-btn">📖 Подробнее</a>
+            <form method="post" action="/calculation/add" style="margin-top: 10px;">
+                <input type="hidden" name="gas_id" value="{{.ID}}">
+                <button type="submit" class="add-to-cart-btn">➕ Добавить в расчеты</button>
+            </form>
+        </div>
+        {{else}}
+        <p>Газы не найдены</p>
+        {{end}}
+    </div>
+</main>
+</body>
+</html>

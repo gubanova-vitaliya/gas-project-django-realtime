@@ -1,0 +1,515 @@
+.gases-page {
+  padding: 0;
+  min-height: calc(100vh - 56px);
+  background-color: #f5f5f5;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #333;
+  flex: 1;
+  min-width: 200px;
+}
+
+.journal-icon-wrapper {
+  max-width: 1200px;
+  margin: 10px auto 0 auto;
+  padding: 0 20px 10px 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.journal-icon-button {
+  position: relative;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.journal-icon-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.journal-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2c3e50, #4680C2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+.journal-icon-inner {
+  position: relative;
+  width: 30px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.journal-book {
+  width: 16px;
+  height: 22px;
+  background: #ffffff;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  padding: 2px 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.journal-book-line {
+  height: 2px;
+  border-radius: 999px;
+  background: #b0c4de;
+}
+
+.journal-book-line.short {
+  width: 70%;
+  align-self: flex-start;
+}
+
+.journal-gas-cylinder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 2px;
+}
+
+.journal-gas-neck {
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+  background: #e0f7ff;
+  margin-bottom: 2px;
+}
+
+.journal-gas-body {
+  width: 10px;
+  height: 14px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #52b3ff, #1e88e5);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.journal-icon-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ff3347;
+  color: #ffffff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.journal-button {
+  margin-left: auto;
+  position: relative;
+}
+
+.journal-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cart-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #4680C2;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.cart-link:hover {
+  background-color: #3a6cb0;
+}
+
+.cart-icon {
+  font-size: 18px;
+}
+
+.cart-count {
+  background: #ff3347;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-link.active {
+  background: #4680C2;
+  color: white;
+  cursor: pointer;
+}
+
+.cart-link.active:hover {
+  background: #3a6cb0;
+}
+
+.cart-link.inactive {
+  background: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.cart-link.inactive:hover {
+  background: #cccccc !important;
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.search-form {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.search-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.search-form button {
+  padding: 10px 20px;
+  background-color: #4680C2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.search-form button:hover {
+  background-color: #3a6cb0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+/* При фильтрации показываем карточки более компактно */
+.grid.filtered {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card h2 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.card img {
+  display: block;
+  margin: 0 auto 12px auto;
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+}
+
+.card .no-image {
+  background: #ddd;
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px auto;
+  border-radius: 8px;
+}
+
+.card p {
+  margin: 8px 0;
+  color: #666;
+  line-height: 1.4;
+}
+
+.card strong {
+  color: #333;
+}
+
+.yellow-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #ffc107;
+  color: #333;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  text-align: center;
+  margin-top: auto;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.yellow-btn:hover {
+  background-color: #e0a800;
+}
+
+.add-to-cart-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.add-to-cart-btn:hover {
+  background: #218838;
+}
+
+.add-to-cart-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.add-to-cart-btn.in-cart {
+  background: #28a745;
+  color: white;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.error-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: #dc3545;
+}
+
+.error-message h3 {
+  margin-bottom: 10px;
+}
+
+.loading-bg {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.no-results h3 {
+  margin-bottom: 10px;
+}
+
+.filter-results-info {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  background-color: #e7f3ff;
+  border-left: 4px solid #4680C2;
+  border-radius: 4px;
+}
+
+.results-count {
+  font-size: 14px;
+  color: #333;
+}
+
+.results-count strong {
+  color: #4680C2;
+  font-weight: 600;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .page-header h1 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+  }
+  
+  .cart-link {
+    justify-content: center;
+    padding: 12px 20px;
+  }
+  
+  .search-form {
+    padding: 15px;
+    flex-direction: column;
+  }
+  
+  .search-form input {
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+  
+  .search-form button {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+  
+  .grid {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .card {
+    padding: 15px;
+  }
+  
+  .card h2 {
+    font-size: 1.2em;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 480px) {
+  .page-header {
+    padding: 10px;
+  }
+  
+  .page-header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .cart-link {
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+  
+  .cart-icon {
+    font-size: 16px;
+  }
+  
+  .search-form {
+    padding: 10px;
+  }
+  
+  .grid {
+    gap: 12px;
+    padding: 10px;
+    flex-direction: column;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  .card h2 {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+  }
+  
+  .card img {
+    width: 120px;
+    height: auto;
+  }
+  
+  .card p {
+    font-size: 14px;
+    margin: 6px 0;
+  }
+  
+  .yellow-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}

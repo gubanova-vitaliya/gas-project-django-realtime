@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <!-- Фон с градиентом -->
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#263238;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#37474f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#455a64;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cylinderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#78909c;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#546e7a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#37474f;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Фоновый прямоугольник -->
+  <rect width="800" height="500" fill="url(#bg2)"/>
+  
+  <!-- Газовый баллон 1 (слева) -->
+  <g transform="translate(150, 150)" filter="url(#shadow)">
+    <!-- Корпус баллона -->
+    <rect x="0" y="0" width="80" height="200" rx="40" fill="url(#cylinderGrad)"/>
+    <!-- Верхняя часть (клапан) -->
+    <rect x="30" y="-20" width="20" height="20" rx="10" fill="#263238"/>
+    <circle cx="40" cy="-10" r="8" fill="#ff6f00"/>
+    <!-- Этикетка -->
+    <rect x="10" y="60" width="60" height="80" rx="5" fill="#ff6f00" opacity="0.9"/>
+    <text x="40" y="110" text-anchor="middle" fill="white" font-size="24" font-weight="bold">O₂</text>
+    <!-- Полоски безопасности -->
+    <line x1="20" y1="40" x2="60" y2="40" stroke="#ff6f00" stroke-width="3"/>
+    <line x1="20" y1="160" x2="60" y2="160" stroke="#ff6f00" stroke-width="3"/>
+  </g>
+  
+  <!-- Газовый баллон 2 (центр) -->
+  <g transform="translate(350, 130)" filter="url(#shadow)">
+    <!-- Корпус баллона -->
+    <rect x="0" y="0" width="80" height="220" rx="40" fill="url(#cylinderGrad)"/>
+    <!-- Верхняя часть (клапан) -->
+    <rect x="30" y="-20" width="20" height="20" rx="10" fill="#263238"/>
+    <circle cx="40" cy="-10" r="8" fill="#00acc1"/>
+    <!-- Этикетка -->
+    <rect x="10" y="70" width="60" height="80" rx="5" fill="#00acc1" opacity="0.9"/>
+    <text x="40" y="120" text-anchor="middle" fill="white" font-size="24" font-weight="bold">N₂</text>
+    <!-- Полоски безопасности -->
+    <line x1="20" y1="50" x2="60" y2="50" stroke="#00acc1" stroke-width="3"/>
+    <line x1="20" y1="170" x2="60" y2="170" stroke="#00acc1" stroke-width="3"/>
+  </g>
+  
+  <!-- Газовый баллон 3 (справа) -->
+  <g transform="translate(550, 150)" filter="url(#shadow)">
+    <!-- Корпус баллона -->
+    <rect x="0" y="0" width="80" height="200" rx="40" fill="url(#cylinderGrad)"/>
+    <!-- Верхняя часть (клапан) -->
+    <rect x="30" y="-20" width="20" height="20" rx="10" fill="#263238"/>
+    <circle cx="40" cy="-10" r="8" fill="#ffc107"/>
+    <!-- Этикетка -->
+    <rect x="10" y="60" width="60" height="80" rx="5" fill="#ffc107" opacity="0.9"/>
+    <text x="40" y="110" text-anchor="middle" fill="#263238" font-size="24" font-weight="bold">H₂</text>
+    <!-- Полоски безопасности -->
+    <line x1="20" y1="40" x2="60" y2="40" stroke="#ffc107" stroke-width="3"/>
+    <line x1="20" y1="160" x2="60" y2="160" stroke="#ffc107" stroke-width="3"/>
+  </g>
+  
+  <!-- Подставки для баллонов -->
+  <rect x="130" y="350" width="120" height="15" rx="7" fill="#263238" opacity="0.8"/>
+  <rect x="330" y="350" width="120" height="15" rx="7" fill="#263238" opacity="0.8"/>
+  <rect x="530" y="350" width="120" height="15" rx="7" fill="#263238" opacity="0.8"/>
+  
+  <!-- Заголовок -->
+  <text x="400" y="80" text-anchor="middle" fill="white" font-size="42" font-weight="bold" font-family="Arial, sans-serif">Промышленные Газы</text>
+  <text x="400" y="110" text-anchor="middle" fill="#b0bec5" font-size="20" font-family="Arial, sans-serif">Газовые баллоны</text>
+  
+  <!-- Декоративные элементы: пар/газ -->
+  <circle cx="190" cy="100" r="15" fill="#ff6f00" opacity="0.4"/>
+  <circle cx="200" cy="90" r="12" fill="#ff6f00" opacity="0.3"/>
+  <circle cx="390" cy="80" r="18" fill="#00acc1" opacity="0.4"/>
+  <circle cx="400" cy="70" r="14" fill="#00acc1" opacity="0.3"/>
+  <circle cx="590" cy="100" r="16" fill="#ffc107" opacity="0.4"/>
+  <circle cx="600" cy="90" r="13" fill="#ffc107" opacity="0.3"/>
+  
+  <!-- Штрих-коды на баллонах (декоративные) -->
+  <g transform="translate(170, 200)">
+    <line x1="0" y1="0" x2="0" y2="30" stroke="white" stroke-width="2"/>
+    <line x1="5" y1="0" x2="5" y2="25" stroke="white" stroke-width="2"/>
+    <line x1="10" y1="0" x2="10" y2="30" stroke="white" stroke-width="2"/>
+    <line x1="15" y1="0" x2="15" y2="20" stroke="white" stroke-width="2"/>
+  </g>
+</svg>

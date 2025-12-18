@@ -1,0 +1,72 @@
+.calculation-page {
+  padding: 20px;
+  max-width: 1200px;
+}
+
+.calculation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.calculation-count {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.calculation-content {
+  margin-top: 30px;
+}
+
+.calculation-data-view h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.calculation-data-edit {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.calculation-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.calculation-gas-card {
+  position: relative;
+}
+
+.gas-quantity-info {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.gas-quantity-info p {
+  margin: 0;
+  padding: 5px 0;
+}
+
+.gas-quantity-info .form-group {
+  margin-bottom: 10px;
+}
+
+.no-gases {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+

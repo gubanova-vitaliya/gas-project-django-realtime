@@ -1,0 +1,35 @@
+# SSL certificates (не должны попадать в репозиторий!)
+*.key
+*.crt
+ca.key
+ca.crt
+cert.key
+cert.crt
+
+# Binaries
+main
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+

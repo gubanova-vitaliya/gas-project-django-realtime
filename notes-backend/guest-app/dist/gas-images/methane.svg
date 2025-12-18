@@ -1,0 +1,18 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ch4Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff3e0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb74d;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#ch4Grad)"/>
+  <text x="150" y="80" font-family="Arial, sans-serif" font-size="48" fill="#e65100" text-anchor="middle" font-weight="bold">CH₄</text>
+  <text x="150" y="120" font-family="Arial, sans-serif" font-size="20" fill="#bf360c" text-anchor="middle">Метан</text>
+  <text x="150" y="150" font-family="Arial, sans-serif" font-size="14" fill="#8c2e00" text-anchor="middle">16.043 г/моль</text>
+</svg>
+
+
+
+
+
+

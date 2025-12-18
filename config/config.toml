@@ -1,0 +1,19 @@
+# ServiceHost и ServicePort для production
+# Для локальной разработки: localhost:8080
+# Для production (Railway, Render и т.д.): используйте переменные окружения
+# PORT будет автоматически установлен платформой (Railway, Render)
+ServiceHost = "0.0.0.0"  # 0.0.0.0 позволяет принимать запросы извне
+ServicePort = 8080
+
+# JWT настройки
+jwt_secret = "test"
+jwt_expire = "24h"
+jwt_algorithm = "HS256"
+
+# Redis настройки
+redis_host = "localhost"
+redis_port = 6379
+redis_password = "password"
+redis_user = ""
+redis_dial_timeout = "10s"
+redis_read_timeout = "10s"

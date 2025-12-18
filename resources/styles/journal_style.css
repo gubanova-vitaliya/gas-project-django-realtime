@@ -1,0 +1,292 @@
+/* Базовые сбросы */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    line-height: 1.4;
+}
+
+/* Контейнер журнала */
+.journal-container {
+    max-width: 95%;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* Шапка */
+.journal-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #4680C2;
+    border-radius: 8px;
+    color: white;
+}
+
+.journal-header h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.journal-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Навигация */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.home-btn {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background: #3a6cb0;
+}
+
+.cart-info {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Таблица */
+.calculations-table-container {
+    background: white;
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+
+.calculations-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 1200px;
+}
+
+.calculations-table th {
+    background: #4680C2;
+    color: white;
+    padding: 10px 6px;
+    text-align: center;
+    font-weight: 600;
+    border: none;
+}
+
+.calculations-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #e7e8ec;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.calculations-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Стили для газа */
+.gas-main-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.gas-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    background: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 10px;
+}
+
+.gas-name {
+    font-weight: 600;
+    font-size: 12px;
+    text-align: center;
+}
+
+.gas-formula {
+    background: #4680C2;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 11px;
+}
+
+.gas-mass {
+    color: #666;
+    font-size: 11px;
+}
+
+/* Ячейки ввода */
+.input-cell {
+    min-width: 110px;
+}
+
+.param-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 11px;
+    text-align: center;
+    background: white;
+}
+
+.param-input:focus {
+    outline: none;
+    border-color: #4680C2;
+}
+
+/* Результаты */
+.result-cell {
+    min-width: 100px;
+}
+
+.final-pressure-value {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.not-calculated {
+    color: #999;
+    font-style: italic;
+    font-size: 10px;
+}
+
+/* Кнопки действий */
+.actions-cell {
+    min-width: 100px;
+}
+
+.calculate-gas-btn,
+.remove-gas-btn {
+    width: 100%;
+    padding: 6px 8px;
+    margin: 2px 0;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 10px;
+    cursor: pointer;
+    display: block;
+}
+
+.calculate-gas-btn {
+    background: #28a745;
+}
+
+.remove-gas-btn {
+    background: #dc3545;
+}
+
+/* Основные кнопки */
+.calculation-actions {
+    padding: 15px;
+    text-align: center;
+    background: #f8f9fa;
+    border-top: 1px solid #e7e8ec;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.calculate-all-btn,
+.submit-btn,
+.btn-primary {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.calculate-all-btn {
+    background: #28a745;
+    color: white;
+}
+
+.submit-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-primary {
+    background: #4680C2;
+    color: white;
+}
+
+/* Инструкция */
+.instructions {
+    text-align: center;
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Пустой журнал */
+.empty-journal {
+    text-align: center;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+
+.empty-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+.empty-journal h3 {
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Статусы */
+.status-badge {
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #6c757d;
+    color: white;
+}

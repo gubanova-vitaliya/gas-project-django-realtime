@@ -1,0 +1,14 @@
+cargo:rerun-if-env-changed=TAURI_CONFIG
+cargo:rustc-check-cfg=cfg(desktop)
+cargo:rustc-cfg=desktop
+cargo:rustc-check-cfg=cfg(mobile)
+cargo:rerun-if-changed=C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\tauri.conf.json
+cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_APP_NAME=guest_app
+cargo:rustc-env=TAURI_ANDROID_PACKAGE_NAME_PREFIX=com_guban
+cargo:rustc-check-cfg=cfg(dev)
+cargo:PERMISSION_FILES_PATH=C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\target\release\build\guest-app-e86b089423322227\out\app-manifest\__app__-permission-files
+cargo:rerun-if-changed=capabilities
+cargo:rerun-if-env-changed=REMOVE_UNUSED_COMMANDS
+cargo:rustc-env=TAURI_ENV_TARGET_TRIPLE=x86_64-pc-windows-gnu
+package.metadata does not exist
+cargo:rustc-link-arg-bins=C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\target\release\build\guest-app-e86b089423322227\out\libresource.a

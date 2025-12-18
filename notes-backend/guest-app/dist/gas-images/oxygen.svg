@@ -1,0 +1,18 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="o2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffebee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ef5350;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#o2Grad)"/>
+  <text x="150" y="80" font-family="Arial, sans-serif" font-size="48" fill="#c62828" text-anchor="middle" font-weight="bold">O₂</text>
+  <text x="150" y="120" font-family="Arial, sans-serif" font-size="20" fill="#b71c1c" text-anchor="middle">Кислород</text>
+  <text x="150" y="150" font-family="Arial, sans-serif" font-size="14" fill="#8e0000" text-anchor="middle">32.0 г/моль</text>
+</svg>
+
+
+
+
+
+

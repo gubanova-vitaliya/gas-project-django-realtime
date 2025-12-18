@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <!-- Фон с градиентом -->
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a237e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#283593;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3949ab;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Фоновый прямоугольник -->
+  <rect width="800" height="500" fill="url(#bg3)"/>
+  
+  <!-- Калькулятор/экран -->
+  <g transform="translate(300, 200)">
+    <!-- Экран калькулятора -->
+    <rect x="0" y="0" width="200" height="120" rx="10" fill="#263238" filter="url(#glow2)"/>
+    <rect x="10" y="10" width="180" height="100" rx="5" fill="#1e88e5"/>
+    
+    <!-- Формула на экране -->
+    <text x="100" y="45" text-anchor="middle" fill="white" font-size="28" font-family="Courier, monospace" font-weight="bold">M = m/n</text>
+    <text x="100" y="75" text-anchor="middle" fill="#b0bec5" font-size="18" font-family="Courier, monospace">M = 32.0 г/моль</text>
+    <text x="100" y="100" text-anchor="middle" fill="#81d4fa" font-size="16" font-family="Courier, monospace">O₂</text>
+  </g>
+  
+  <!-- График/диаграмма -->
+  <g transform="translate(100, 180)">
+    <!-- Оси координат -->
+    <line x1="50" y1="0" x2="50" y2="150" stroke="#64b5f6" stroke-width="2"/>
+    <line x1="50" y1="150" x2="200" y2="150" stroke="#64b5f6" stroke-width="2"/>
+    
+    <!-- Подписи осей -->
+    <text x="25" y="75" text-anchor="middle" fill="#90caf9" font-size="14" transform="rotate(-90 25 75)">Масса</text>
+    <text x="125" y="175" text-anchor="middle" fill="#90caf9" font-size="14">Количество</text>
+    
+    <!-- График (линия) -->
+    <polyline points="60,140 80,120 100,100 120,80 140,60 160,50 180,45" 
+              fill="none" stroke="#ffd54f" stroke-width="3" filter="url(#glow2)"/>
+    
+    <!-- Точки на графике -->
+    <circle cx="80" cy="120" r="4" fill="#ffd54f"/>
+    <circle cx="100" cy="100" r="4" fill="#ffd54f"/>
+    <circle cx="120" cy="80" r="4" fill="#ffd54f"/>
+    <circle cx="140" cy="60" r="4" fill="#ffd54f"/>
+  </g>
+  
+  <!-- Формулы и расчеты (справа) -->
+  <g transform="translate(550, 180)">
+    <!-- Блок с формулой -->
+    <rect x="0" y="0" width="180" height="140" rx="10" fill="rgba(30, 136, 229, 0.2)" stroke="#1e88e5" stroke-width="2"/>
+    
+    <!-- Формулы -->
+    <text x="90" y="30" text-anchor="middle" fill="#ffd54f" font-size="20" font-family="Courier, monospace" font-weight="bold">PV = nRT</text>
+    <text x="90" y="60" text-anchor="middle" fill="#81d4fa" font-size="16" font-family="Courier, monospace">n = m/M</text>
+    <text x="90" y="90" text-anchor="middle" fill="#a5d6a7" font-size="16" font-family="Courier, monospace">ρ = m/V</text>
+    
+    <!-- Результат -->
+    <line x1="20" y1="110" x2="160" y2="110" stroke="#1e88e5" stroke-width="1"/>
+    <text x="90" y="130" text-anchor="middle" fill="white" font-size="18" font-family="Courier, monospace" font-weight="bold">M = 32.0 г/моль</text>
+  </g>
+  
+  <!-- Молекулярная структура (декоративная) -->
+  <g transform="translate(200, 350)">
+    <circle cx="0" cy="0" r="25" fill="#ef5350" opacity="0.6"/>
+    <text x="0" y="8" text-anchor="middle" fill="white" font-size="18" font-weight="bold">O</text>
+    <line x1="25" y1="0" x2="75" y2="0" stroke="#ef5350" stroke-width="3"/>
+    <circle cx="100" cy="0" r="25" fill="#ef5350" opacity="0.6"/>
+    <text x="100" y="8" text-anchor="middle" fill="white" font-size="18" font-weight="bold">O</text>
+  </g>
+  
+  <!-- Заголовок -->
+  <text x="400" y="80" text-anchor="middle" fill="white" font-size="42" font-weight="bold" font-family="Arial, sans-serif">Научные Расчеты</text>
+  <text x="400" y="110" text-anchor="middle" fill="#b0bec5" font-size="20" font-family="Arial, sans-serif">Точные расчеты молярных масс</text>
+  
+  <!-- Декоративные математические символы -->
+  <text x="150" y="280" fill="#64b5f6" font-size="40" opacity="0.3">∑</text>
+  <text x="650" y="300" fill="#ffd54f" font-size="35" opacity="0.3">∫</text>
+  <text x="400" y="420" fill="#a5d6a7" font-size="30" opacity="0.3">Δ</text>
+  
+  <!-- Частицы/точки данных -->
+  <circle cx="80" cy="100" r="3" fill="#ffd54f" opacity="0.6"/>
+  <circle cx="720" cy="120" r="2" fill="#64b5f6" opacity="0.6"/>
+  <circle cx="750" cy="200" r="4" fill="#ef5350" opacity="0.6"/>
+  <circle cx="50" cy="250" r="3" fill="#a5d6a7" opacity="0.6"/>
+</svg>

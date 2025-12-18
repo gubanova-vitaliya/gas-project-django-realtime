@@ -1,0 +1,10 @@
+C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\target\release\deps\toml_datetime-5eb6cbeacfea3c88.d: C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\lib.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\datetime.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\de.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\ser.rs
+
+C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\target\release\deps\libtoml_datetime-5eb6cbeacfea3c88.rlib: C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\lib.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\datetime.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\de.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\ser.rs
+
+C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\target\release\deps\libtoml_datetime-5eb6cbeacfea3c88.rmeta: C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\lib.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\datetime.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\de.rs C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\ser.rs
+
+C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\lib.rs:
+C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\datetime.rs:
+C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\de.rs:
+C:\Users\guban\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\toml_datetime-0.7.3\src\ser.rs:

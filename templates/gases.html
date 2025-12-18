@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{if .gas}}{{.gas.Title}} - Подробное описание{{else}}Газ не найден{{end}}</title>
+    <link rel="stylesheet" href="/static/styles/index_style.css">
+    <link rel="stylesheet" href="/static/styles/gas_detail.css">
+</head>
+<body>
+<header>
+    <a href="/gas" class="home-btn">🏠 Домой</a>
+</header>
+
+<main>
+    <div class="gas-detail-container">
+        {{if .gas}}
+        <div class="gas-card">
+            <div class="gas-header">
+                <h1>{{.gas.Title}}</h1>
+                <span class="gas-formula">{{.gas.Formula}}</span>
+            </div>
+
+            <div class="gas-image">
+                {{if .gas.ImageURL}}
+                <img src="{{.gas.ImageURL}}" alt="{{.gas.Title}}"
+                     onerror="this.src='https://via.placeholder.com/300x200/667eea/ffffff?text=No+Image'">
+                {{else}}
+                <img src="https://via.placeholder.com/300x200/667eea/ffffff?text=No+Image" alt="No image">
+                {{end}}
+            </div>
+
+            <div class="gas-properties">
+                <div class="property-card">
+                    <div class="property-label">Молярная масса</div>
+                    <div class="property-value">{{printf "%.2f" .gas.MolarMass}} г/моль</div>
+                </div>
+                <div class="property-card">
+                    <div class="property-label">ID газа</div>
+                    <div class="property-value">#{{.gas.ID}}</div>
+                </div>
+            </div>
+
+            <div class="gas-description">
+                {{if .gas.Description}}
+                {{.gas.Description}}
+                {{else}}
+                Описание отсутствует
+                {{end}}
+            </div>
+        </div>
+        {{else}}
+        <div class="gas-card">
+            <div class="not-found">
+                <h2>Газ не найден</h2>
+                <p>Запрошенный газ не существует или был удален</p>
+                <a href="/gas" class="yellow-btn">Вернуться к каталогу</a>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</main>
+</body>
+</html>

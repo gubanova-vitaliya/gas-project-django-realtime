@@ -1,0 +1,2 @@
+cargo:rustc-link-search=native=C:\Users\guban\OneDrive\Desktop\gas-project-frontend\notes-backend\guest-app\src-tauri\target\release\build\webview2-com-sys-39c35b276c644115\out\x64
+cargo:rustc-link-lib=advapi32
