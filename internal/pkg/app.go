@@ -5,7 +5,6 @@ import (
 	"WEB/internal/app/ds"
 	"WEB/internal/app/handler"
 	"WEB/internal/app/repository"
-	"WEB/internal/app/role"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -18,7 +17,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -248,15 +246,14 @@ func (a *Application) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid credentials"})
 		return
 	}
-	userRole := role.FromString(user.Role)
 	// Генерируем JWT токен
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &ds.JWTClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		UserUUID: user.UUID,
-		Role:     userRole, // Используем преобразованную роль
+		UserID:      user.ID,
+		IsModerator: user.IsModerator,
 	})
 
 	tokenString, err := token.SignedString([]byte(a.Config.JWT.Secret))
@@ -312,12 +309,9 @@ func (a *Application) Register(ctx *gin.Context) {
 
 	// Создаем пользователя
 	user := &ds.User{
-		UUID:     uuid.New(),
-		Role:     "buyer",
-		Name:     req.Name,
-		Login:    req.Name, // используем имя как логин для простоты
-		Email:    req.Email,
-		Password: hashedPassword,
+		Login:       req.Name, // используем имя как логин для простоты
+		Password:    hashedPassword,
+		IsModerator: false,
 	}
 
 	err = a.Repository.Register(user)

@@ -9,7 +9,7 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "./useTypedRedux";
 import { setCartCount } from "../slices/cartSlice";
-import { setAppId, setCount } from "../slices/calculationSlice";
+import { setAppId, setCount } from "../slices/vesselPressureSlice";
 import { getCartCount } from "../modules/cartApi";
 import axios from "axios"; // Axios для HTTP-запросов
 import { getDestApi } from "../../target_config";

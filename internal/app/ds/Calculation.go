@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Calculation struct {
+type VesselPressure struct {
 	ID     uint           `gorm:"primaryKey"`
 	Status string         `gorm:"type:varchar(15);not null;default:'draft'"`
 	Text   sql.NullString `gorm:"type:text;default:null"`
@@ -22,7 +22,7 @@ type Calculation struct {
 	CreatorID   uint  `gorm:"not null"`
 	ModeratorID *uint `gorm:"default:null"`
 
-	// Параметры расчета (общие для всего расчета)
+	// Параметры давления сосуда (общие для всего давления сосуда)
 	InitialPressure    sql.NullFloat64 `gorm:"type:decimal(10,4);default:null"`
 	InitialTemperature sql.NullFloat64 `gorm:"type:decimal(10,4);default:null"`
 	FinalTemperature   sql.NullFloat64 `gorm:"type:decimal(10,4);default:null"`
@@ -34,8 +34,13 @@ type Calculation struct {
 	Creator   User  `gorm:"foreignKey:CreatorID"`
 	Moderator *User `gorm:"foreignKey:ModeratorID"`
 
-	// Газы в расчете
-	Gases []GasCalculation `gorm:"foreignKey:CalculationID"`
+	// Газы в давлении сосуда
+	Gases []GasVesselPressure `gorm:"foreignKey:VesselPressureID"`
 
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+// TableName задает имя таблицы в базе данных (оставляем старое название "calculations")
+func (VesselPressure) TableName() string {
+	return "calculations"
 }

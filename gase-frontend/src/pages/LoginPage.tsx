@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { loginUserAsync, getUserProfileAsync, clearError } from '../slices/userSlice';
 import { clearCart, setCartCount } from '../slices/cartSlice';
-import { clearCalculation, setAppId, setCount, clearMyCalculations } from '../slices/calculationSlice';
+import { clearVesselPressure, setAppId, setCount, clearMyVesselPressures } from '../slices/vesselPressureSlice';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../Routes';
 import './LoginPage.css';
@@ -59,8 +59,8 @@ const LoginPage: React.FC = () => {
         // Вызов нескольких синхронных действий для очистки состояния
         dispatch(clearCart());
         dispatch(setCartCount({ count: 0, draftId: null }));
-        dispatch(clearCalculation());
-        dispatch(clearMyCalculations()); // Очищаем список заявок
+        dispatch(clearVesselPressure());
+        dispatch(clearMyVesselPressures()); // Очищаем список заявок
         dispatch(setAppId(null));
         dispatch(setCount(0));
         

@@ -3,11 +3,11 @@ package handler
 import (
 	"WEB/internal/app/ds"
 	"WEB/internal/app/repository"
-	"WEB/internal/app/role"
 	"errors"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,22 +47,22 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 	// 2. GET-запрос на просмотр одной карточки
 	router.GET("/gas/:id", h.GetGasById)
 
-	// 3. GET-запрос на просмотр текущего расчета в журнале
+	// 3. GET-запрос на просмотр текущего давления сосуда в журнале
 	router.GET("/journal", h.GetJournal)
 
-	// 4. POST-запрос на добавление расчета в журнал
-	router.POST("/calculation/add", h.AddGasToCalculation)
+	// 4. POST-запрос на добавление давления сосуда в журнал
+	router.POST("/calculation/add", h.AddGasToVesselPressure)
 
-	// 5. POST-запрос на логическое удаление расчета из журнала
-	router.POST("/calculation/:id/remove", h.RemoveGasFromCalculation)
+	// 5. POST-запрос на логическое удаление давления сосуда из журнала
+	router.POST("/calculation/:id/remove", h.RemoveGasFromVesselPressure)
 
-	// 6. Новые маршруты для работы с расчетами
+	// 6. Новые маршруты для работы с давлениями сосудов
 	router.POST("/calculation/:id/calculate", h.CalculateGasPressure)
 	router.POST("/calculation/:id/update", h.UpdateGasParams)
 	router.POST("/calculation/calculate-all", h.CalculateAllGases)
 	router.POST("/calculation/update-all", h.UpdateAllGasParams)
 	router.POST("/calculation/save-all", h.SaveAllGasParams)
-	router.POST("/calculation/:id/submit", h.SubmitCalculation)
+	router.POST("/calculation/:id/submit", h.SubmitVesselPressure)
 }
 
 // findProjectRoot ищет корень проекта, проверяя наличие папки templates
@@ -126,64 +126,62 @@ func (h *Handler) RegisterAPI(router *gin.Engine) {
 	optionalAuth.Use(h.AuthMiddleware()) // Пытается получить токен, но не требует его
 	{
 		optionalAuth.GET("/cart", h.ApiGetCart)
-		optionalAuth.POST("/gases/:id/add-to-draft", h.ApiAddGasToDraft)
 	}
 
-	// Админские эндпоинты для управления газами
-	adminGas := api.Group("")
-	adminGas.Use(h.AuthMiddleware())
-	adminGas.Use(h.RoleMiddleware(role.Admin))
+	// Эндпоинт для асинхронного сервиса (без JWT, с проверкой auth_token в теле запроса)
+	asyncService := api.Group("")
 	{
-		adminGas.POST("/gases", h.ApiCreateGas)
-		adminGas.PUT("/gases/:id", h.ApiUpdateGas)
-		adminGas.DELETE("/gases/:id", h.ApiDeleteGas)
-		adminGas.POST("/gases/:id/image", h.ApiUploadGasImage)
+		asyncService.PUT("/mm/gas/:id/result", h.ApiMMUpdateResult)
+	}
+
+	// Модераторские эндпоинты для управления газами
+	moderatorGas := api.Group("")
+	moderatorGas.Use(h.AuthMiddleware())
+	moderatorGas.Use(h.ModeratorMiddleware())
+	{
+		moderatorGas.POST("/gases", h.ApiCreateGas)
+		moderatorGas.PUT("/gases/:id", h.ApiUpdateGas)
+		moderatorGas.DELETE("/gases/:id", h.ApiDeleteGas)
+		moderatorGas.POST("/gases/:id/image", h.ApiUploadGasImage)
 	}
 
 	// Защищенные эндпоинты (требуют авторизации)
 	protected := api.Group("")
 	protected.Use(h.AuthMiddleware())
+	protected.Use(h.RequireAuthMiddleware()) // Требует обязательной аутентификации
 	{
 		protected.GET("/users/me", h.ApiGetProfile)
 		protected.PUT("/users/me", h.ApiUpdateMe)
 		protected.POST("/auth/logout", h.ApiLogout)
 
 		// Заявки пользователя
-		protected.GET("/my-calculations", h.ApiGetMyCalculations)
-		protected.GET("/my-draft", h.ApiGetMyDraft) // Получить черновик как заявку
-		protected.GET("/calculations/:id", h.ApiGetCalculation)
-		protected.POST("/calculations", h.ApiCreateCalculation)
-		protected.PUT("/calculations/:id", h.ApiUpdateCalculation)
-		protected.DELETE("/calculations/:id", h.ApiDeleteCalculation)
-		protected.POST("/calculations/:id/submit", h.ApiSubmitCalculation)
-		protected.PUT("/calculations/:id/complete", h.ApiCompleteCalculation)
+		protected.GET("/my-vessel-pressures", h.ApiGetMyVesselPressures)
+		protected.GET("/my-draft", h.ApiGetMyDraft)   // Получить последний черновик
+		protected.GET("/my-drafts", h.ApiGetMyDrafts) // Получить ВСЕ черновики
+		protected.GET("/vessel-pressures/:id", h.ApiGetCalculation)
+		protected.POST("/vessel-pressures", h.ApiCreateVesselPressure)
+		protected.PUT("/vessel-pressures/:id", h.ApiUpdateVesselPressure)
+		protected.DELETE("/vessel-pressures/:id", h.ApiDeleteVesselPressure)
+		protected.POST("/vessel-pressures/:id/submit", h.ApiSubmitCalculation)
+		protected.POST("/gases/:id/add-to-draft", h.ApiAddGasToDraft)
+		protected.PUT("/vessel-pressures/:id/complete", h.ApiCompleteVesselPressure)
 
-		// Управление газами в расчетах (GasCalculation)
+		// Управление газами в давлении сосуда (GasVesselPressure)
 		protected.DELETE("/mm/gas/:id", h.ApiMMDelete)
 		protected.PUT("/mm/gas/:id", h.ApiMMUpdate)
-
-		// Эндпоинт для приема результатов от асинхронного сервиса
-		protected.PUT("/mm/gas/:id/result", h.ApiMMUpdateResult)
 	}
 
 	// Модераторские эндпоинты
 	moderator := api.Group("")
 	moderator.Use(h.AuthMiddleware())
-	moderator.Use(h.RoleMiddleware(role.Manager, role.Admin))
+	moderator.Use(h.ModeratorMiddleware())
 	{
-		moderator.GET("/calculations", h.ApiListCalculations)
-		// moderator.PUT("/calculations/:id/complete", h.ApiCompleteCalculation)  // <-- УДАЛИЛИ ОТСЮДА
-		moderator.PUT("/calculations/:id/reject", h.ApiRejectCalculation)
+		moderator.GET("/vessel-pressures", h.ApiListVesselPressures)
+		moderator.POST("/vessel-pressures/:id/calculate", h.ApiCalculateVesselPressure)
+		moderator.PUT("/vessel-pressures/:id/reject", h.ApiRejectVesselPressure)
 		moderator.GET("/users", h.ApiGetAllUsers)
-	}
-
-	// Админские эндпоинты
-	admin := api.Group("")
-	admin.Use(h.AuthMiddleware())
-	admin.Use(h.RoleMiddleware(role.Admin))
-	{
-		admin.DELETE("/users/:uuid", h.ApiDeleteUser)
-		admin.PUT("/users/:uuid/role", h.ApiUpdateUserRole)
+		moderator.DELETE("/users/:id", h.ApiDeleteUser)
+		moderator.PUT("/users/:id/moderator", h.ApiUpdateUserModeratorStatus)
 	}
 }
 
@@ -221,10 +219,13 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 			})
 
 			if err == nil && token != nil {
-				// Если токен валиден, сохраняем claims
-				ctx.Set("jwt_claims", claims)
-				ctx.Set("user_uuid", claims.UserUUID.String())
-				ctx.Set("user_role", claims.Role)
+				// Проверяем валидность токена
+				if token.Valid {
+					// Если токен валиден, сохраняем claims
+					ctx.Set("jwt_claims", claims)
+					ctx.Set("user_id", claims.UserID)
+					ctx.Set("is_moderator", claims.IsModerator)
+				}
 			}
 		}
 
@@ -240,8 +241,6 @@ func (h *Handler) AuthMiddleware() gin.HandlerFunc {
 type apiRegisterReq struct {
 	Login    string `json:"login" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Email    string `json:"email,omitempty"`
-	Name     string `json:"name" binding:"required"`
 }
 
 type apiLoginReq struct {
@@ -254,15 +253,13 @@ type apiUpdateMeReq struct {
 }
 
 type userResp struct {
-	UUID  string `json:"uuid"`
-	Name  string `json:"name"`
-	Login string `json:"login"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID          uint   `json:"id"`
+	Login       string `json:"login"`
+	IsModerator bool   `json:"is_moderator"`
 }
 
-type updateRoleRequest struct {
-	Role string `json:"role" binding:"required"`
+type updateModeratorRequest struct {
+	IsModerator bool `json:"is_moderator" binding:"required"`
 }
 
 // ApiRegister godoc
@@ -291,11 +288,9 @@ func (h *Handler) ApiRegister(ctx *gin.Context) {
 	}
 
 	user := &ds.User{
-		Name:     req.Name,
 		Login:    req.Login,
-		Email:    req.Email,
-		Role:     role.Buyer.String(), // Преобразуем в string
 		Password: hashedPassword,
+		IsModerator: false, // По умолчанию обычный пользователь
 	}
 
 	err = h.Repository.Register(user)
@@ -307,11 +302,9 @@ func (h *Handler) ApiRegister(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "User registered successfully",
 		"user": userResp{
-			UUID:  user.UUID.String(),
-			Name:  user.Name,
-			Login: user.Login,
-			Email: user.Email,
-			Role:  user.Role, // Уже string, не нужно .String()
+			ID:          user.ID,
+			Login:       user.Login,
+			IsModerator: user.IsModerator,
 		},
 	})
 }
@@ -327,24 +320,22 @@ func (h *Handler) ApiRegister(ctx *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /api/users/me [get]
 func (h *Handler) ApiGetProfile(ctx *gin.Context) {
-	userUUID, exists := ctx.Get("user_uuid")
+	userID, exists := ctx.Get("user_id")
 	if !exists {
 		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("user not authenticated"))
 		return
 	}
 
-	user, err := h.Repository.GetUserByUUID(userUUID.(string))
+	user, err := h.Repository.GetUserByID(userID.(uint))
 	if err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, userResp{
-		UUID:  user.UUID.String(),
-		Name:  user.Name,
-		Login: user.Login,
-		Email: user.Email,
-		Role:  user.Role, // Уже string, не нужно .String()
+		ID:          user.ID,
+		Login:       user.Login,
+		IsModerator: user.IsModerator,
 	})
 }
 
@@ -425,11 +416,9 @@ func (h *Handler) ApiGetAllUsers(ctx *gin.Context) {
 	var resp []userResp
 	for _, user := range users {
 		resp = append(resp, userResp{
-			UUID:  user.UUID.String(),
-			Name:  user.Name,
-			Login: user.Login,
-			Email: user.Email,
-			Role:  user.Role, // Уже string, не нужно .String()
+			ID:          user.ID,
+			Login:       user.Login,
+			IsModerator: user.IsModerator,
 		})
 	}
 
@@ -438,24 +427,25 @@ func (h *Handler) ApiGetAllUsers(ctx *gin.Context) {
 
 // ApiDeleteUser godoc
 // @Summary Delete user
-// @Description Delete user by UUID (Admin only)
+// @Description Delete user by ID (Moderator only)
 // @Tags Users
 // @Produce json
 // @Security BearerAuth
-// @Param uuid path string true "User UUID"
+// @Param id path int true "User ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/users/{uuid} [delete]
+// @Router /api/users/{id} [delete]
 func (h *Handler) ApiDeleteUser(ctx *gin.Context) {
-	userUUID := ctx.Param("uuid")
-	if userUUID == "" {
-		h.errorHandler(ctx, http.StatusBadRequest, errors.New("user UUID is required"))
+	userIDStr := ctx.Param("id")
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
-	if err := h.Repository.DeleteUser(userUUID); err != nil {
+	if err := h.Repository.DeleteUser(uint(userID)); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -463,35 +453,35 @@ func (h *Handler) ApiDeleteUser(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
-// ApiUpdateUserRole godoc
-// @Summary Update user role
-// @Description Update user role by UUID (Admin only)
+// ApiUpdateUserModeratorStatus godoc
+// @Summary Update user moderator status
+// @Description Update user moderator status by ID (Moderator only)
 // @Tags Users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param uuid path string true "User UUID"
-// @Param request body updateRoleRequest true "New role"
+// @Param id path int true "User ID"
+// @Param request body updateModeratorRequest true "New moderator status"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/users/{uuid}/role [put]
-func (h *Handler) ApiUpdateUserRole(ctx *gin.Context) {
-	userUUID := ctx.Param("uuid")
-	if userUUID == "" {
-		h.errorHandler(ctx, http.StatusBadRequest, errors.New("user UUID is required"))
+// @Router /api/users/{id}/moderator [put]
+func (h *Handler) ApiUpdateUserModeratorStatus(ctx *gin.Context) {
+	userIDStr := ctx.Param("id")
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusBadRequest, errors.New("invalid user ID"))
 		return
 	}
 
-	var req updateRoleRequest
+	var req updateModeratorRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	newRole := role.FromString(req.Role)
-	if err := h.Repository.UpdateUserRole(userUUID, newRole); err != nil {
+	if err := h.Repository.UpdateUserModeratorStatus(uint(userID), req.IsModerator); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -521,18 +511,20 @@ type apiLoginResp struct {
 func (h *Handler) ApiLogin(ctx *gin.Context) {
 	var req apiLoginReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		logrus.Errorf("Login request binding error: %v", err)
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 
+	logrus.Infof("Login attempt for user: %s", req.Login)
 	user, err := h.Repository.AuthenticateUser(req.Login, req.Password)
 	if err != nil {
+		logrus.Warnf("Authentication failed for user %s: %v", req.Login, err)
 		h.errorHandler(ctx, http.StatusUnauthorized, err)
 		return
 	}
 
-	// Преобразуем строковую роль обратно в тип Role для JWT
-	userRole := role.FromString(user.Role)
+	logrus.Infof("User %s authenticated successfully, ID: %d, IsModerator: %v", user.Login, user.ID, user.IsModerator)
 
 	// Генерируем JWT токен
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &ds.JWTClaims{
@@ -540,8 +532,8 @@ func (h *Handler) ApiLogin(ctx *gin.Context) {
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		UserUUID: user.UUID,
-		Role:     userRole, // Используем преобразованную роль
+		UserID:      user.ID,
+		IsModerator: user.IsModerator,
 	})
 
 	tokenString, err := token.SignedString([]byte("test")) // используйте секрет из конфига
@@ -558,35 +550,77 @@ func (h *Handler) ApiLogin(ctx *gin.Context) {
 		TokenType:   "Bearer",
 		ExpiresIn:   24 * 3600,
 		User: userResp{
-			UUID:  user.UUID.String(),
-			Name:  user.Name,
-			Login: user.Login,
-			Email: user.Email,
-			Role:  user.Role, // Уже string, не нужно .String()
+			ID:          user.ID,
+			Login:       user.Login,
+			IsModerator: user.IsModerator,
 		},
 	})
 }
 
-// RoleMiddleware middleware для проверки ролей
-func (h *Handler) RoleMiddleware(allowedRoles ...role.Role) gin.HandlerFunc {
+// RequireAuthMiddleware middleware для обязательной проверки аутентификации
+func (h *Handler) RequireAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userRole, exists := ctx.Get("user_role")
+		logrus.Infof("RequireAuthMiddleware: checking auth for %s %s", ctx.Request.Method, ctx.Request.URL.Path)
+		
+		userID, exists := ctx.Get("user_id")
+		if !exists || userID == nil {
+			logrus.Warnf("Unauthorized access attempt to %s %s - user_id not found in context", ctx.Request.Method, ctx.Request.URL.Path)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+			ctx.Abort()
+			return
+		}
+		
+		logrus.Infof("RequireAuthMiddleware: user_id found: %v (type: %T)", userID, userID)
+		
+		// Проверяем, что userID валиден
+		var uid uint
+		switch v := userID.(type) {
+		case uint:
+			uid = v
+		case int:
+			uid = uint(v)
+		case int64:
+			uid = uint(v)
+		case float64:
+			uid = uint(v)
+		default:
+			logrus.Warnf("Invalid user ID type for %s %s: %T, value: %v", ctx.Request.Method, ctx.Request.URL.Path, userID, userID)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID"})
+			ctx.Abort()
+			return
+		}
+		
+		if uid == 0 {
+			logrus.Warnf("Zero user ID for %s %s", ctx.Request.Method, ctx.Request.URL.Path)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user ID"})
+			ctx.Abort()
+			return
+		}
+		
+		logrus.Infof("RequireAuthMiddleware: auth successful for user %d", uid)
+		ctx.Next()
+	}
+}
+
+// ModeratorMiddleware middleware для проверки прав модератора
+func (h *Handler) ModeratorMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		isModerator, exists := ctx.Get("is_moderator")
 		if !exists {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User role not found"})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User authentication not found"})
 			ctx.Abort()
 			return
 		}
 
-		hasAccess := false
-		for _, allowedRole := range allowedRoles {
-			if userRole.(role.Role) == allowedRole {
-				hasAccess = true
-				break
-			}
+		moderatorStatus, ok := isModerator.(bool)
+		if !ok {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid moderator status"})
+			ctx.Abort()
+			return
 		}
 
-		if !hasAccess {
-			ctx.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+		if !moderatorStatus {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions. Moderator access required."})
 			ctx.Abort()
 			return
 		}

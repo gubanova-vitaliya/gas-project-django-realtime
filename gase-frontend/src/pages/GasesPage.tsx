@@ -8,12 +8,13 @@
  * 4. Диспатч асинхронных действий через dispatch(asyncThunk())
  */
 import "./GasesPage.css";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useLayoutEffect, useRef } from "react";
 import { Spinner, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux"; // Redux хуки для работы с store
 import { useNavigate } from "react-router-dom";
 import { ROUTE_LABELS, ROUTES } from "../Routes";
 import { RootState } from "../store"; // Типы для типобезопасности
+import CartIcon from "../components/CartIcon.svelte";
 import {
   useFilteredGases,      // Кастомный селектор (хук) для получения отфильтрованных газов
   useGasLoading,         // Кастомный селектор для состояния загрузки
@@ -35,6 +36,7 @@ export const GasesPage: FC = () => {
   // useDispatch - хук для вызова действий (изменение состояния)
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const cartIconRef = useRef<HTMLDivElement>(null);
   
   // ИСПОЛЬЗОВАНИЕ СЕЛЕКТОРОВ (получение данных из Redux store):
   // Кастомные хуки-селекторы - удобный способ доступа к данным с типизацией
@@ -48,14 +50,29 @@ export const GasesPage: FC = () => {
   // Прямое использование useSelector для доступа к другим слайсам
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   
-  // Получаем количество расчетов в журнале из другого слайса (calculation)
-  const journalCount = useSelector((state: RootState) => state.calculation.count || 0);
+  // Получаем количество давления сосуда в журнале из другого слайса (vesselPressure)
+  const journalCount = useSelector((state: RootState) => state.vesselPressure.count || 0);
   
   // Проверяем, активны ли фильтры
   const hasActiveFilters = filters.minMolarMass !== undefined || filters.maxMolarMass !== undefined;
 
   // Загружаем данные корзины
   useCartData();
+
+  // Монтируем Svelte компонент иконки корзины
+  useLayoutEffect(() => {
+    if (cartIconRef.current && isAuthenticated) {
+      const cartIcon = new CartIcon({
+        target: cartIconRef.current,
+        props: { navigate },
+      });
+      return () => {
+        if (cartIcon && typeof cartIcon.$destroy === 'function') {
+          cartIcon.$destroy();
+        }
+      };
+    }
+  }, [navigate, isAuthenticated]);
 
   // ЗАГРУЗКА ДАННЫХ ЧЕРЕЗ REDUX THUNK:
   // При монтировании компонента вызываем асинхронное действие getGasesList()
@@ -69,39 +86,11 @@ export const GasesPage: FC = () => {
     <div className="gases-page">
       <div className="page-header">
         <h1>{ROUTE_LABELS.GASES}</h1>
+        {isAuthenticated && (
+          <div ref={cartIconRef} className="cart-icon-wrapper"></div>
+        )}
       </div>
 
-      {isAuthenticated && (
-        <div className="journal-icon-wrapper">
-          <button
-            type="button"
-            className={`journal-icon-button ${journalCount === 0 ? "disabled" : ""}`}
-            onClick={() => journalCount > 0 && navigate(ROUTES.JOURNAL)}
-            disabled={journalCount === 0}
-            aria-label="Журнал расчетов"
-            title={journalCount > 0 ? "Открыть журнал расчетов" : "Журнал расчетов пуст"}
-          >
-            <span className="journal-icon-circle">
-              <span className="journal-icon-inner">
-                <span className="journal-book">
-                  <span className="journal-book-line" />
-                  <span className="journal-book-line" />
-                  <span className="journal-book-line short" />
-                </span>
-                <span className="journal-gas-cylinder">
-                  <span className="journal-gas-neck" />
-                  <span className="journal-gas-body" />
-                </span>
-              </span>
-            </span>
-            {journalCount > 0 && (
-              <span className="journal-icon-badge">
-                {journalCount}
-              </span>
-            )}
-          </button>
-        </div>
-      )}
 
       {/* Поле поиска */}
       <div className="search-container">

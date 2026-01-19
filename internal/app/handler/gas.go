@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -191,32 +192,48 @@ func (h *Handler) ApiUploadGasImage(ctx *gin.Context) {
 
 // ApiAddGasToDraft POST /api/gases/:id/add-to-draft
 func (h *Handler) ApiAddGasToDraft(ctx *gin.Context) {
+	logrus.Infof("ApiAddGasToDraft called with gas ID: %s", ctx.Param("id"))
+	
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
+		logrus.Errorf("Invalid gas ID: %s, error: %v", ctx.Param("id"), err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 	
+	logrus.Infof("Parsed gas ID: %d", id)
+	
 	// Получаем ID пользователя из JWT токена
 	creatorID, err := h.getCreatorIDFromContext(ctx)
 	if err != nil {
+		logrus.Errorf("Failed to get creator ID from context: %v", err)
 		h.errorHandler(ctx, http.StatusUnauthorized, err)
 		return
 	}
 	
+	logrus.Infof("Got creator ID: %d", creatorID)
+	
+	// Проверяем, что creatorID валиден
+	if creatorID == 0 {
+		logrus.Errorf("Invalid creator ID: 0")
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("invalid user ID"))
+		return
+	}
+	
+	logrus.Infof("Adding gas %d to draft for user %d", id, creatorID)
 	if err := h.Repository.AddGasToDraft(uint(id), creatorID); err != nil {
+		logrus.Errorf("Error adding gas %d to draft for user %d: %v", id, creatorID, err)
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
-	ctx.Status(http.StatusNoContent)
-}
-
-// ApiGetCart GET /api/cart
-func (h *Handler) ApiGetCart(ctx *gin.Context) {
-	// Получаем ID пользователя из JWT токена
-	creatorID, err := h.getCreatorIDFromContext(ctx)
+	
+	logrus.Infof("Successfully added gas %d to draft for user %d", id, creatorID)
+	
+	// Возвращаем данные корзины после добавления газа
+	draftID, count, err := h.Repository.GetDraftCartInfo(creatorID)
 	if err != nil {
-		// Если пользователь не авторизован, возвращаем пустую корзину
+		logrus.Errorf("Error getting draft cart info for user %d: %v", creatorID, err)
+		// Если не удалось получить данные корзины, все равно возвращаем успех
 		ctx.JSON(http.StatusOK, gin.H{
 			"draft_id": nil,
 			"count":    0,
@@ -224,10 +241,41 @@ func (h *Handler) ApiGetCart(ctx *gin.Context) {
 		return
 	}
 	
-	id, count, err := h.Repository.GetDraftCartInfo(creatorID)
+	ctx.JSON(http.StatusOK, gin.H{
+		"draft_id": draftID,
+		"count":    count,
+	})
+}
+
+// ApiGetCart GET /api/cart
+func (h *Handler) ApiGetCart(ctx *gin.Context) {
+	logrus.Infof("ApiGetCart called")
+	
+	// Получаем ID пользователя из JWT токена
+	creatorID, err := h.getCreatorIDFromContext(ctx)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		// Если пользователь не авторизован, возвращаем пустую корзину
+		logrus.Infof("User not authenticated, returning empty cart")
+		ctx.JSON(http.StatusOK, gin.H{
+			"draft_id": nil,
+			"count":    0,
+		})
 		return
 	}
+	
+	logrus.Infof("Getting cart for creatorID: %d", creatorID)
+	id, count, err := h.Repository.GetDraftCartInfo(creatorID)
+	if err != nil {
+		logrus.Errorf("Error getting draft cart info for creatorID %d: %v", creatorID, err)
+		// Вместо возврата ошибки, возвращаем пустую корзину
+		// Это более безопасно для пользователя
+		ctx.JSON(http.StatusOK, gin.H{
+			"draft_id": nil,
+			"count":    0,
+		})
+		return
+	}
+	
+	logrus.Infof("Cart info: draft_id=%d, count=%d", id, count)
 	ctx.JSON(http.StatusOK, gin.H{"draft_id": id, "count": count})
 }

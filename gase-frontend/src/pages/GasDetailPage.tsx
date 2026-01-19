@@ -7,13 +7,13 @@ import { Spinner } from "react-bootstrap";
 import { getDestRoot } from "../../target_config";
 
 // Получаем базовый путь для правильного формирования путей
-const getDefaultImage = () => {
+const getPlaceholderImage = () => {
   const destRoot = getDestRoot();
   if (destRoot === '') {
-    return '/slide1.svg';
+    return '/gas-images/i.webp'; // Используем дефолтное изображение газа вместо slide1
   }
   const base = destRoot.endsWith('/') ? destRoot : destRoot + '/';
-  return base + 'slide1.svg';
+  return base + 'gas-images/i.webp';
 };
 
 export const GasDetailPage: FC = () => {
@@ -39,11 +39,13 @@ export const GasDetailPage: FC = () => {
   }, [id]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // Если изображение не загрузилось (из MinIO или другого источника), используем дефолтное
+    // Если изображение не загрузилось из MinIO, используем placeholder
     const target = e.target as HTMLImageElement;
-    const defaultImagePath = getDefaultImage();
-    if (target.src !== defaultImagePath) {
-      target.src = defaultImagePath;
+    console.warn(`Failed to load image from MinIO: ${target.src}, falling back to placeholder`);
+    const placeholderPath = getPlaceholderImage();
+    // Не зацикливаемся на ошибках - если placeholder тоже не загрузился, оставляем как есть
+    if (target.src !== placeholderPath && !target.src.includes('gas-images/i.webp')) {
+      target.src = placeholderPath;
     }
   };
 
@@ -86,7 +88,7 @@ export const GasDetailPage: FC = () => {
 
           <div className="gas-image">
                 <img
-                  src={pageData.image_url || getDefaultImage()}
+                  src={pageData.image_url || getPlaceholderImage()}
                   alt={pageData.title}
                   onError={handleImageError}
                   loading="lazy"

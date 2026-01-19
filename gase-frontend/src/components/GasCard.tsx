@@ -4,17 +4,17 @@ import { useDispatch, useSelector } from "react-redux";
 import "./GasCard.css";
 import { getDestRoot } from "../../target_config";
 import { AppDispatch, RootState } from "../store";
-import { addGasToCalculation } from "../slices/calculationSlice";
+import { addGasToVesselPressure, getAllDraftsAsync } from "../slices/vesselPressureSlice";
 import { loadCartData } from "../hooks/useCartData";
 
-// Получаем базовый путь для правильного формирования путей
-const getDefaultImage = () => {
+// Получаем placeholder изображение, если изображение из MinIO недоступно
+const getPlaceholderImage = () => {
   const destRoot = getDestRoot();
   if (destRoot === '') {
-    return '/slide1.svg';
+    return '/gas-images/i.webp'; // Используем дефолтное изображение газа вместо slide1
   }
   const base = destRoot.endsWith('/') ? destRoot : destRoot + '/';
-  return base + 'slide1.svg';
+  return base + 'gas-images/i.webp';
 };
 
 export interface Gas {
@@ -38,10 +38,11 @@ export const GasCard: FC<GasCardProps> = ({ gas, onCardClick }) => {
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
     // Логируем ошибку для отладки
-    console.warn(`Failed to load image: ${target.src}, falling back to default image`);
-    const defaultImagePath = getDefaultImage();
-    if (target.src !== defaultImagePath && !target.src.includes('slide1.svg')) {
-      target.src = defaultImagePath;
+    console.warn(`Failed to load image from MinIO: ${target.src}, falling back to placeholder`);
+    const placeholderPath = getPlaceholderImage();
+    // Не зацикливаемся на ошибках - если placeholder тоже не загрузился, оставляем как есть
+    if (target.src !== placeholderPath && !target.src.includes('gas-images/i.webp')) {
+      target.src = placeholderPath;
     }
   };
 
@@ -49,10 +50,12 @@ export const GasCard: FC<GasCardProps> = ({ gas, onCardClick }) => {
   const handleAdd = async () => {
     if (gas.id) {
       try {
-        const result = await dispatch(addGasToCalculation(gas.id));
-        if (addGasToCalculation.fulfilled.match(result)) {
+        const result = await dispatch(addGasToVesselPressure(gas.id));
+        if (addGasToVesselPressure.fulfilled.match(result)) {
           // Обновляем корзину после успешного добавления
           await loadCartData(dispatch);
+          // Обновляем все черновики, чтобы они отображались в журнале
+          await dispatch(getAllDraftsAsync());
           // Не переходим на другую страницу - остаемся на текущей
         }
       } catch (error) {
@@ -66,7 +69,7 @@ export const GasCard: FC<GasCardProps> = ({ gas, onCardClick }) => {
             <Card.Img
               className="card-image"
               variant="top"
-              src={gas.image_url || getDefaultImage()}
+              src={gas.image_url || getPlaceholderImage()}
               alt={gas.title}
               onClick={() => onCardClick(gas.id)}
               onError={handleImageError}

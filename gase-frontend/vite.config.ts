@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { VitePWA } from 'vite-plugin-pwa'
 import mkcert from 'vite-plugin-mkcert'
 import fs from 'fs'
@@ -45,6 +46,7 @@ export default defineConfig(({ command, mode }) => {
   return {
   plugins: [
     react(),
+    svelte(),
     mkcert({
       // Автоматически создавать сертификаты для localhost и IP адресов
       // Это позволит работать на мобильных устройствах в локальной сети

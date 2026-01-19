@@ -36,8 +36,8 @@ const transformImageUrl = (imageUrl: string | null): string | null => {
     return finalUrl;
   }
   
-  // Если URL указывает на MinIO (любой домен с портом 9000 или содержит /gase/ или /gases/)
-  const isMinIOUrl = imageUrl.includes(':9000') || 
+  // Если URL указывает на MinIO (любой домен с портом 19000 или содержит /gase/ или /gases/)
+  const isMinIOUrl = imageUrl.includes(':19000') || imageUrl.includes(':9000') || 
                      imageUrl.includes('/gase/') || 
                      imageUrl.includes('/gases/') ||
                      imageUrl.includes('minio');

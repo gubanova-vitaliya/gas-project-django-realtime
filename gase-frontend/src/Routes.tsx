@@ -17,10 +17,10 @@ export const ROUTE_LABELS: { [key in RouteKeyType]: string } = {
   GASES: "Газы",
   LOGIN: "Авторизация",
   REGISTER: "Регистрация",
-  CALCULATION: "Заявка",
-  MY_CALCULATIONS: "Мои заявки",
+  CALCULATION: "Давление сосуда",
+  MY_CALCULATIONS: "Мои давления сосудов",
   PROFILE: "Профиль",
-  JOURNAL: "Журнал расчетов",
+  JOURNAL: "Журнал давления сосуда",
   MODERATOR: "Панель модератора",
 };
 

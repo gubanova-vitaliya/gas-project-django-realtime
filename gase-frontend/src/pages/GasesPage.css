@@ -24,6 +24,13 @@
   min-width: 200px;
 }
 
+.cart-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 200px;
+}
+
 .journal-icon-wrapper {
   max-width: 1200px;
   margin: 10px auto 0 auto;

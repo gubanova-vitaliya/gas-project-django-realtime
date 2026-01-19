@@ -193,19 +193,56 @@ func (r *Repository) normalizeGasImage(gas *ds.Gas) {
 }
 
 func (r *Repository) normalizeImageURL(raw string) string {
-	if raw == "" || strings.HasPrefix(raw, minioProxyPrefix) {
+	if raw == "" {
 		return raw
 	}
+	
+	// Если уже в правильном формате /api/minio/..., возвращаем как есть
+	if strings.HasPrefix(raw, minioProxyPrefix) {
+		return raw
+	}
+	
+	// Если это полный URL к MinIO (http://localhost:19000/gases/... или http://localhost:9000/gases/...)
+	if strings.Contains(raw, "://") && (strings.Contains(raw, ":19000") || strings.Contains(raw, ":9000")) {
+		// Извлекаем путь после домена
+		if idx := strings.Index(raw, "/gases/"); idx >= 0 {
+			path := strings.TrimPrefix(raw[idx:], "/")
+			return minioProxyPrefix + path
+		}
+		if idx := strings.Index(raw, "/gase/"); idx >= 0 {
+			// Исправляем неправильное имя bucket
+			path := strings.TrimPrefix(raw[idx:], "/")
+			path = strings.Replace(path, "gase/", "gases/", 1)
+			return minioProxyPrefix + path
+		}
+	}
+	
+	// Если содержит bucket name (gases/... или gase/...)
 	marker := r.minioBucket + "/"
 	if idx := strings.Index(raw, marker); idx >= 0 {
 		path := strings.TrimPrefix(raw[idx:], "/")
 		return minioProxyPrefix + path
 	}
+	
+	// Исправляем неправильное имя bucket (gase -> gases)
+	if idx := strings.Index(raw, "gase/"); idx >= 0 {
+		path := strings.TrimPrefix(raw[idx:], "/")
+		path = strings.Replace(path, "gase/", "gases/", 1)
+		return minioProxyPrefix + path
+	}
+	
+	// Если это относительный путь (не начинается с http:// или https://)
 	if !strings.HasPrefix(raw, "http://") && !strings.HasPrefix(raw, "https://") {
 		path := strings.TrimPrefix(raw, "/")
 		if path != "" {
+			// Если путь не содержит bucket, добавляем его
+			if !strings.HasPrefix(path, "gases/") && !strings.HasPrefix(path, "gase/") {
+				path = r.minioBucket + "/" + path
+			}
 			return minioProxyPrefix + path
 		}
 	}
+	
+	// Если ничего не подошло, возвращаем как есть (может быть внешний URL)
 	return raw
 }

@@ -10,7 +10,7 @@ import { ROUTES, ROUTE_LABELS } from "../Routes";
 import { AppDispatch, RootState } from "../store";
 import { logoutUserAsync } from "../slices/userSlice";
 import { getGasesList, setSearchValue, clearFilters } from "../slices/gasSlice";
-import { clearCalculation, clearMyCalculations } from "../slices/calculationSlice";
+import { clearVesselPressure, clearMyVesselPressures } from "../slices/vesselPressureSlice";
 import { clearCart } from "../slices/cartSlice";
 import "./Navbar.css";
 
@@ -21,7 +21,7 @@ export const AppNavbar: FC = () => {
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const username = useSelector((state: RootState) => state.user.username);
   const userProfile = useSelector((state: RootState) => state.user.profile);
-  const isModerator = userProfile?.role === 'manager' || userProfile?.role === 'admin';
+  const isModerator = userProfile?.is_moderator === true;
 
   // Обработчик выхода
   const handleExit = async () => {
@@ -30,8 +30,8 @@ export const AppNavbar: FC = () => {
     dispatch(setSearchValue(''));
     dispatch(clearFilters());
     // Сброс конструктора заявки
-    dispatch(clearCalculation());
-    dispatch(clearMyCalculations()); // Очищаем список заявок
+    dispatch(clearVesselPressure());
+    dispatch(clearMyVesselPressures()); // Очищаем список заявок
     dispatch(clearCart());
     navigate(ROUTES.GASES);
     await dispatch(getGasesList());
@@ -57,23 +57,20 @@ export const AppNavbar: FC = () => {
                 {ROUTE_LABELS.MY_CALCULATIONS}
               </Nav.Link>
             )}
-            {isAuthenticated && isModerator && (
-              <Nav.Link as={Link} to={ROUTES.MODERATOR}>
-                {ROUTE_LABELS.MODERATOR}
-              </Nav.Link>
-            )}
           </Nav>
           <Nav className="ms-auto align-items-center">
             {isAuthenticated && (
-              <NavDropdown title={username || 'Пользователь'} id="user-dropdown" className="me-2">
-                <NavDropdown.Item as={Link} to={ROUTES.PROFILE}>
-                  {ROUTE_LABELS.PROFILE}
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleExit}>
-                  Выйти
-                </NavDropdown.Item>
-              </NavDropdown>
+              <>
+                <NavDropdown title={username || 'Пользователь'} id="user-dropdown" className="me-2">
+                  <NavDropdown.Item as={Link} to={ROUTES.PROFILE}>
+                    {ROUTE_LABELS.PROFILE}
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleExit}>
+                    Выйти
+                  </NavDropdown.Item>
+                </NavDropdown>
+              </>
             )}
             {!isAuthenticated && (
               <>

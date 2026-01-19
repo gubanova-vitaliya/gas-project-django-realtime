@@ -5,8 +5,8 @@ import { GasesPage } from "./pages/GasesPage";
 import { GasDetailPage } from "./pages/GasDetailPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import CalculationPage from "./pages/CalculationPage";
-import MyCalculationsPage from "./pages/MyCalculationsPage";
+import VesselPressurePage from "./pages/VesselPressurePage";
+import MyVesselPressuresPage from "./pages/MyVesselPressuresPage";
 import ProfilePage from "./pages/ProfilePage";
 import JournalPage from "./pages/JournalPage";
 import ModeratorPage from "./pages/ModeratorPage";
@@ -22,11 +22,11 @@ function App() {
         <Route path={`${ROUTES.GASES}/:id`} element={<GasDetailPage />} />
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
-        <Route path={ROUTES.MY_CALCULATIONS} element={<MyCalculationsPage />} />
+        <Route path={ROUTES.MY_CALCULATIONS} element={<MyVesselPressuresPage />} />
         <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
         <Route path={ROUTES.JOURNAL} element={<JournalPage />} />
         <Route path={ROUTES.MODERATOR} element={<ModeratorPage />} />
-        <Route path={`${ROUTES.CALCULATION}/:id`} element={<CalculationPage />} />
+        <Route path={`${ROUTES.CALCULATION}/:id`} element={<VesselPressurePage />} />
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
       </Routes>
     </>

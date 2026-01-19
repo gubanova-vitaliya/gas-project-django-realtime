@@ -89,3 +89,9 @@
     font-size: 1rem;
   }
 }
+
+.cart-icon-container {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}

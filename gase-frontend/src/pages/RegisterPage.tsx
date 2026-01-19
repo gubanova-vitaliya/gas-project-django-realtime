@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
 import { registerUserAsync, clearError } from '../slices/userSlice';
 import { clearCart, setCartCount } from '../slices/cartSlice';
-import { clearCalculation, setAppId, setCount, clearMyCalculations } from '../slices/calculationSlice';
+import { clearVesselPressure, setAppId, setCount, clearMyVesselPressures } from '../slices/vesselPressureSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import { ROUTES } from '../Routes';
 import './RegisterPage.css';
@@ -16,8 +16,6 @@ const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     login: '',
     password: '',
-    name: '',
-    email: '',
   });
   const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
   
@@ -52,10 +50,6 @@ const RegisterPage: React.FC = () => {
       errors.password = 'Пароль обязателен для заполнения';
     }
 
-    if (!formData.name || formData.name.trim().length === 0) {
-      errors.name = 'Имя обязательно для заполнения';
-    }
-
     // Убраны все проверки: длины пароля, формата email, совпадения паролей
 
     setValidationErrors(errors);
@@ -87,8 +81,6 @@ const RegisterPage: React.FC = () => {
     const result = await dispatch(registerUserAsync({
       login: formData.login,
       password: formData.password,
-      name: formData.name,
-      email: formData.email || undefined,
     }));
 
     if (registerUserAsync.fulfilled.match(result)) {
@@ -99,8 +91,8 @@ const RegisterPage: React.FC = () => {
       // Очищаем все данные перед переходом на страницу входа
       dispatch(clearCart());
       dispatch(setCartCount({ count: 0, draftId: null }));
-      dispatch(clearCalculation());
-      dispatch(clearMyCalculations()); // Очищаем список заявок
+      dispatch(clearVesselPressure());
+      dispatch(clearMyVesselPressures()); // Очищаем список заявок
       dispatch(setAppId(null));
       dispatch(setCount(0));
       // После успешной регистрации перенаправляем на страницу входа
@@ -128,33 +120,6 @@ const RegisterPage: React.FC = () => {
             <Form.Control.Feedback type="invalid">
               {validationErrors.login}
             </Form.Control.Feedback>
-          </Form.Group>
-
-          <Form.Group controlId="name" className="mb-3">
-            <Form.Label>Имя *</Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Введите имя"
-              required
-              isInvalid={!!validationErrors.name}
-            />
-            <Form.Control.Feedback type="invalid">
-              {validationErrors.name}
-            </Form.Control.Feedback>
-          </Form.Group>
-
-          <Form.Group controlId="email" className="mb-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="text"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Введите email (необязательно)"
-            />
           </Form.Group>
 
           <Form.Group controlId="password" className="mb-4">

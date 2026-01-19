@@ -11,14 +11,14 @@
  * - gas: список газов и фильтры
  * - cart: корзина покупок
  * - user: данные пользователя и авторизация
- * - calculation: расчеты и заявки
+ * - vesselPressure: давление сосуда и заявки
  */
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import gasCalculationReducer from "./slices/dataSlice";
 import gasReducer from "./slices/gasSlice";
 import cartReducer from "./slices/cartSlice";
 import userReducer from "./slices/userSlice";
-import calculationReducer from "./slices/calculationSlice";
+import vesselPressureReducer from "./slices/vesselPressureSlice";
 
 /**
  * Объединение всех редьюсеров в единое дерево состояния
@@ -29,7 +29,7 @@ import calculationReducer from "./slices/calculationSlice";
  *   gas: { ... },
  *   cart: { ... },
  *   user: { ... },
- *   calculation: { ... }
+ *   vesselPressure: { ... }
  * }
  */
 const rootReducer = combineReducers({
@@ -37,7 +37,7 @@ const rootReducer = combineReducers({
   gas: gasReducer,
   cart: cartReducer,
   user: userReducer,
-  calculation: calculationReducer,
+  vesselPressure: vesselPressureReducer,
 });
 
 /**

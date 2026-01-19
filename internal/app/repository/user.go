@@ -2,25 +2,18 @@ package repository
 
 import (
 	"WEB/internal/app/ds"
-	"WEB/internal/app/role"
 	"errors"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// GetCalculationsByUser возвращает заявки пользователя
-func (r *Repository) GetCalculationsByUser(userUUID uuid.UUID) ([]ds.Calculation, error) {
-	var user ds.User
-	if err := r.db.Where("uuid = ?", userUUID).First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	var calculations []ds.Calculation
+// GetCalculationsByUser возвращает заявки пользователя по ID
+func (r *Repository) GetCalculationsByUser(userID uint) ([]ds.VesselPressure, error) {
+	var calculations []ds.VesselPressure
 	err := r.db.
 		Preload("Gases").
 		Preload("Gases.Gas").
-		Where("creator_id = ?", user.ID).
+		Where("creator_id = ?", userID).
 		Where("status <> ?", "deleted").
 		Order("date_create DESC").
 		Find(&calculations).Error
@@ -32,37 +25,30 @@ func (r *Repository) GetCalculationsByUser(userUUID uuid.UUID) ([]ds.Calculation
 	return calculations, nil
 }
 
-// CreateCalculation создает новую заявку
-func (r *Repository) CreateCalculation(calculation *ds.Calculation) error {
-	return r.db.Create(calculation).Error
+// CreateVesselPressure создает новую заявку
+func (r *Repository) CreateVesselPressure(vesselPressure *ds.VesselPressure) error {
+	return r.db.Create(vesselPressure).Error
 }
 
-// GetUserCalculations возвращает заявки пользователя по UUID (без черновиков)
-func (r *Repository) GetUserCalculations(userUUID string) ([]ds.Calculation, error) {
-	var user ds.User
-	if err := r.db.Where("uuid = ?", userUUID).First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	var calculations []ds.Calculation
+// GetUserVesselPressures возвращает заявки пользователя по ID (без черновиков)
+func (r *Repository) GetUserVesselPressures(userID uint) ([]ds.VesselPressure, error) {
+	var vesselPressures []ds.VesselPressure
 	err := r.db.
 		Preload("Gases").     // Загружаем связанные газы
 		Preload("Gases.Gas"). // Загружаем данные самих газов
-		Where("creator_id = ?", user.ID).
-		Where("status <> ?", "draft"). // Исключаем черновики из списка "Мои заявки" (но включаем "deleted" и "formed")
+		Where("creator_id = ?", userID).
+		Where("status <> ?", "draft").   // Исключаем черновики из списка "Мои заявки"
+		Where("status <> ?", "deleted"). // Исключаем удаленные заявки
 		Order("date_create DESC").
-		Find(&calculations).Error
+		Find(&vesselPressures).Error
 
-	return calculations, err
+	return vesselPressures, err
 }
 
 // Register регистрирует нового пользователя
 func (r *Repository) Register(user *ds.User) error {
-	if user.UUID == uuid.Nil {
-		user.UUID = uuid.New()
-	}
-
-	// Убраны проверки на уникальность логина и email - разрешена регистрация с любыми повторяющимися значениями
+	// IsModerator по умолчанию false
+	user.IsModerator = false
 	return r.db.Create(user).Error
 }
 
@@ -83,7 +69,8 @@ func (r *Repository) VerifyPassword(hashedPassword, password string) error {
 // GetUserByLogin возвращает пользователя по логину
 func (r *Repository) GetUserByLogin(login string) (*ds.User, error) {
 	var user ds.User
-	if err := r.db.Where("login = ?", login).First(&user).Error; err != nil {
+	// Используем LOWER для регистронезависимого поиска
+	if err := r.db.Where("LOWER(login) = LOWER(?)", login).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -105,18 +92,18 @@ func (r *Repository) AuthenticateUser(login, password string) (*ds.User, error) 
 	return user, nil
 }
 
-// GetUserByUUID возвращает пользователя по UUID
-func (r *Repository) GetUserByUUID(userUUID string) (*ds.User, error) {
+// GetUserByID возвращает пользователя по ID
+func (r *Repository) GetUserByID(userID uint) (*ds.User, error) {
 	var user ds.User
-	if err := r.db.Where("uuid = ?", userUUID).First(&user).Error; err != nil {
+	if err := r.db.First(&user, userID).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-// UpdateUserRole обновляет роль пользователя (только для администраторов)
-func (r *Repository) UpdateUserRole(userUUID string, newRole role.Role) error {
-	return r.db.Model(&ds.User{}).Where("uuid = ?", userUUID).Update("role", newRole).Error
+// UpdateUserModeratorStatus обновляет статус модератора пользователя
+func (r *Repository) UpdateUserModeratorStatus(userID uint, isModerator bool) error {
+	return r.db.Model(&ds.User{}).Where("id = ?", userID).Update("is_moderator", isModerator).Error
 }
 
 // GetAllUsers возвращает всех пользователей (для администраторов)
@@ -128,7 +115,7 @@ func (r *Repository) GetAllUsers() ([]ds.User, error) {
 	return users, nil
 }
 
-// DeleteUser мягко удаляет пользователя
-func (r *Repository) DeleteUser(userUUID string) error {
-	return r.db.Where("uuid = ?", userUUID).Delete(&ds.User{}).Error
+// DeleteUser удаляет пользователя
+func (r *Repository) DeleteUser(userID uint) error {
+	return r.db.Delete(&ds.User{}, userID).Error
 }

@@ -10,31 +10,33 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // -------- Request/Response DTOs --------
 
-// CreateCalculationRequest represents request for creating calculation
-// @Description Create calculation request
-type CreateCalculationRequest struct {
-	Title string `json:"title" binding:"required" example:"My Calculation"`
-	Text  string `json:"text" example:"Calculation description"`
+// CreateVesselPressureRequest represents request for creating vessel pressure
+// @Description Create vessel pressure request
+type CreateVesselPressureRequest struct {
+	Title string `json:"title" binding:"required" example:"My Vessel Pressure"`
+	Text  string `json:"text" example:"Vessel pressure description"`
 }
 
-// CalculationResponse represents calculation response for API
-// @Description Calculation response object
-type CalculationResponse struct {
+// VesselPressureResponse represents vessel pressure response for API
+// @Description Vessel pressure response object
+type VesselPressureResponse struct {
 	ID                uint                `json:"id" example:"1"`
 	Status            string              `json:"status" example:"draft"`
-	Text              string              `json:"text" example:"Calculation description"`
+	Text              string              `json:"text" example:"Vessel pressure description"`
 	DateCreate        time.Time           `json:"date_create"`
 	CreatorID         uint                `json:"creator_id" example:"1"`
-	CalculationNumber int                 `json:"calculation_number" example:"1"` // Номер заявки для пользователя (начинается с 1)
-	Gases             []GasCalculationDTO `json:"gases,omitempty"`
+	VesselPressureNumber int                 `json:"vessel_pressure_number" example:"1"` // Номер заявки для пользователя (начинается с 1)
+	CalculatedCount   int                 `json:"calculated_count" example:"2"`   // Количество газов с рассчитанным давлением
+	Gases             []GasVesselPressureDTO `json:"gases,omitempty"`
 }
 
-// GasCalculationDTO represents gas calculation for API without sql.Null types
-type GasCalculationDTO struct {
+// GasVesselPressureDTO represents gas vessel pressure for API without sql.Null types
+type GasVesselPressureDTO struct {
 	ID                 uint     `json:"id"`
 	GasID              uint     `json:"gas_id"`
 	Sound              bool     `json:"sound"`
@@ -59,8 +61,8 @@ type GasDTO struct {
 	Description string  `json:"description"`
 }
 
-// CalculationDetailDTO represents full calculation with gases for API
-type CalculationDetailDTO struct {
+// VesselPressureDetailDTO represents full vessel pressure with gases for API
+type VesselPressureDetailDTO struct {
 	ID                 uint                `json:"id"`
 	Status             string              `json:"status"`
 	Text               string              `json:"text"`
@@ -76,13 +78,13 @@ type CalculationDetailDTO struct {
 	GasAmount          *float64            `json:"gas_amount"`
 	FinalPressure      *float64            `json:"final_pressure"`
 	GasesCount         int                 `json:"gases_count"`
-	Gases              []GasCalculationDTO `json:"gases"`
+	Gases              []GasVesselPressureDTO `json:"gases"`
 }
 
 // -------- HTML Handlers --------
 
-// AddGasToCalculation добавляет газ в расчет - POST запрос №4
-func (h *Handler) AddGasToCalculation(ctx *gin.Context) {
+// AddGasToVesselPressure добавляет газ в давление сосуда - POST запрос №4
+func (h *Handler) AddGasToVesselPressure(ctx *gin.Context) {
 	gasIDStr := ctx.PostForm("gas_id")
 	gasID, err := strconv.Atoi(gasIDStr)
 	if err != nil {
@@ -104,8 +106,8 @@ func (h *Handler) AddGasToCalculation(ctx *gin.Context) {
 		creatorID = h.Repository.FixedCreatorID()
 	}
 
-	// Добавляем газ в расчет (в память)
-	err = h.Repository.AddGasToCalculation(creatorID, gas)
+	// Добавляем газ в давление сосуда (в память)
+	err = h.Repository.AddGasToVesselPressure(creatorID, gas)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -115,7 +117,7 @@ func (h *Handler) AddGasToCalculation(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, "/gas?message=added")
 }
 
-// GetJournal отображает журнал расчетов - GET запрос №3
+// GetJournal отображает журнал давления сосуда - GET запрос №3
 func (h *Handler) GetJournal(ctx *gin.Context) {
 	// Получаем ID пользователя из JWT токена (опционально, так как это старый веб-интерфейс)
 	creatorID, err := h.getCreatorIDFromContext(ctx)
@@ -124,24 +126,24 @@ func (h *Handler) GetJournal(ctx *gin.Context) {
 		creatorID = h.Repository.FixedCreatorID()
 	}
 
-	// Получаем черновик расчета с газами
-	calculation, err := h.Repository.GetDraftCalculation(creatorID)
+	// Получаем черновик давления сосуда с газами
+	vesselPressure, err := h.Repository.GetDraftVesselPressure(creatorID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	ctx.HTML(http.StatusOK, "journal.html", gin.H{
-		"calculation": calculation,
-		"gases":       calculation.Gases,
-		"cart_count":  len(calculation.Gases),
+		"vessel_pressure": vesselPressure,
+		"gases":       vesselPressure.Gases,
+		"cart_count":  len(vesselPressure.Gases),
 	})
 }
 
-// RemoveGasFromCalculation логически удаляет газ из расчета - POST запрос №5
-func (h *Handler) RemoveGasFromCalculation(ctx *gin.Context) {
+// RemoveGasFromVesselPressure логически удаляет газ из давления сосуда - POST запрос №5
+func (h *Handler) RemoveGasFromVesselPressure(ctx *gin.Context) {
 	gasCalculationIDStr := ctx.Param("id")
-	gasCalculationID, err := strconv.ParseUint(gasCalculationIDStr, 10, 32)
+	gasVesselPressureID, err := strconv.ParseUint(gasCalculationIDStr, 10, 32)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -154,7 +156,7 @@ func (h *Handler) RemoveGasFromCalculation(ctx *gin.Context) {
 		creatorID = h.Repository.FixedCreatorID()
 	}
 
-	err = h.Repository.RemoveGasFromCalculation(creatorID, uint(gasCalculationID))
+	err = h.Repository.RemoveGasFromVesselPressure(creatorID, uint(gasVesselPressureID))
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -202,9 +204,9 @@ func (h *Handler) UpdateGasParams(ctx *gin.Context) {
 		}
 	}
 
-	// Сохраняем параметры БЕЗ расчета
+	// Сохраняем параметры БЕЗ расчета давления сосуда
 	if len(params) > 0 {
-		if err := h.Repository.UpdateGasCalculationParams(uint(gasCalcID), params); err != nil {
+		if err := h.Repository.UpdateGasVesselPressureParams(uint(gasCalcID), params); err != nil {
 			h.errorHandler(ctx, http.StatusInternalServerError, err)
 			return
 		}
@@ -214,10 +216,10 @@ func (h *Handler) UpdateGasParams(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "saved"})
 }
 
-// SubmitCalculation отправляет расчет на модерацию
-func (h *Handler) SubmitCalculation(ctx *gin.Context) {
+// SubmitVesselPressure отправляет давление сосуда на модерацию
+func (h *Handler) SubmitVesselPressure(ctx *gin.Context) {
 	calculationIDStr := ctx.Param("id")
-	calculationID, err := strconv.ParseUint(calculationIDStr, 10, 32)
+	vesselPressureID, err := strconv.ParseUint(calculationIDStr, 10, 32)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
@@ -230,7 +232,7 @@ func (h *Handler) SubmitCalculation(ctx *gin.Context) {
 		creatorID = h.Repository.FixedCreatorID()
 	}
 
-	if err := h.Repository.SubmitCalculation(uint(calculationID), creatorID); err != nil {
+	if err := h.Repository.SubmitVesselPressure(uint(vesselPressureID), creatorID); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -267,7 +269,7 @@ func (h *Handler) CalculateGasPressure(ctx *gin.Context) {
 		params["initial_temperature"] = initialTemp
 	}
 
-	// Выполняем расчет
+	// Выполняем расчет давления сосуда
 	calculatedPressure, err := h.Repository.CalculateGasPressure(uint(gasCalcID), params)
 	if err != nil {
 		// Показываем ошибку пользователю
@@ -276,12 +278,12 @@ func (h *Handler) CalculateGasPressure(ctx *gin.Context) {
 		if creatorID == 0 {
 			creatorID = h.Repository.FixedCreatorID()
 		}
-		calculation, _ := h.Repository.GetDraftCalculation(creatorID)
+		vesselPressure, _ := h.Repository.GetDraftVesselPressure(creatorID)
 
 		ctx.HTML(http.StatusOK, "journal.html", gin.H{
-			"calculation": calculation,
-			"gases":       calculation.Gases,
-			"cart_count":  len(calculation.Gases),
+			"vessel_pressure": vesselPressure,
+			"gases":       vesselPressure.Gases,
+			"cart_count":  len(vesselPressure.Gases),
 			"error":       err.Error(),
 		})
 		return
@@ -291,7 +293,7 @@ func (h *Handler) CalculateGasPressure(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, fmt.Sprintf("/journal?message=calculated&pressure=%.4f", calculatedPressure))
 }
 
-// CalculateAllGases рассчитывает все газы в расчете
+// CalculateAllGases рассчитывает все газы в давлении сосуда
 func (h *Handler) CalculateAllGases(ctx *gin.Context) {
 	// Получаем ID пользователя из JWT токена (опционально, так как это старый веб-интерфейс)
 	creatorID, err := h.getCreatorIDFromContext(ctx)
@@ -300,14 +302,14 @@ func (h *Handler) CalculateAllGases(ctx *gin.Context) {
 		creatorID = h.Repository.FixedCreatorID()
 	}
 
-	calculation, err := h.Repository.GetDraftCalculation(creatorID)
+	vesselPressure, err := h.Repository.GetDraftVesselPressure(creatorID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Игнорируем возвращаемое значение результатов
-	_, err = h.Repository.CalculateAllGases(calculation.ID)
+	_, err = h.Repository.CalculateAllGases(vesselPressure.ID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -329,10 +331,10 @@ type apiCalcUpdate struct {
 	Status *string `json:"status"`
 }
 
-// ApiListCalculations godoc
-// @Summary List all calculations (Moderator only)
-// @Description Get list of all calculations - requires moderator role
-// @Tags Calculations
+// ApiListVesselPressures godoc
+// @Summary List all vessel pressures (Moderator only)
+// @Description Get list of all vessel pressures - requires moderator role
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
 // @Param status query string false "Filter by status"
@@ -341,22 +343,34 @@ type apiCalcUpdate struct {
 // @Success 200 {array} map[string]interface{}
 // @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/calculations [get]
-func (h *Handler) ApiListCalculations(ctx *gin.Context) {
+// @Router /api/vessel-pressures [get]
+func (h *Handler) ApiListVesselPressures(ctx *gin.Context) {
+	logrus.Infof("ApiListVesselPressures called with query: %s", ctx.Request.URL.RawQuery)
+	
 	var f apiCalcListFilter
-	_ = ctx.ShouldBindQuery(&f)
+	if err := ctx.ShouldBindQuery(&f); err != nil {
+		logrus.Errorf("Error binding query parameters: %v", err)
+		h.errorHandler(ctx, http.StatusBadRequest, err)
+		return
+	}
+	
+	logrus.Infof("ApiListVesselPressures filters: status=%s, dateFrom=%s, dateTo=%s", f.Status, f.DateFrom, f.DateTo)
+	
 	list, err := h.Repository.ListCalculations(f.Status, f.DateFrom, f.DateTo)
 	if err != nil {
+		logrus.Errorf("Error in ListCalculations: %v", err)
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
+	
+	logrus.Infof("ApiListVesselPressures returning %d items", len(list))
 	ctx.JSON(http.StatusOK, list)
 }
 
 // ApiGetCalculation godoc
 // @Summary Get calculation details
 // @Description Get calculation details by ID
-// @Tags Calculations
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
 // @Param id path int true "Calculation ID"
@@ -364,7 +378,7 @@ func (h *Handler) ApiListCalculations(ctx *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/calculations/{id} [get]
+// @Router /api/vessel-pressures/{id} [get]
 func (h *Handler) ApiGetCalculation(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -379,35 +393,44 @@ func (h *Handler) ApiGetCalculation(ctx *gin.Context) {
 		return
 	}
 
-	item, gases, err := h.Repository.GetCalculationDetail(uint(id))
+	item, gases, err := h.Repository.GetVesselPressureDetail(uint(id))
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
-	// Проверяем, что заявка принадлежит текущему пользователю
-	if item.CreatorID != creatorID {
-		h.errorHandler(ctx, http.StatusForbidden, errors.New("access denied: this calculation belongs to another user"))
+	// Проверяем, является ли пользователь модератором
+	isModeratorInterface, exists := ctx.Get("is_moderator")
+	isModerator := false
+	if exists {
+		if moderatorStatus, ok := isModeratorInterface.(bool); ok {
+			isModerator = moderatorStatus
+		}
+	}
+
+	// Проверяем, что давление сосуда принадлежит текущему пользователю ИЛИ пользователь является модератором
+	if item.CreatorID != creatorID && !isModerator {
+		h.errorHandler(ctx, http.StatusForbidden, errors.New("access denied: this vessel pressure belongs to another user"))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"calculation": item, "gases": gases})
+	ctx.JSON(http.StatusOK, gin.H{"vessel_pressure": item, "gases": gases})
 }
 
-// ApiUpdateCalculation godoc
-// @Summary Update calculation
-// @Description Update calculation fields
-// @Tags Calculations
+// ApiUpdateVesselPressure godoc
+// @Summary Update vessel pressure
+// @Description Update vessel pressure fields
+// @Tags VesselPressures
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "Calculation ID"
+// @Param id path int true "Vessel Pressure ID"
 // @Param request body apiCalcUpdate true "Update data"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/calculations/{id} [put]
-func (h *Handler) ApiUpdateCalculation(ctx *gin.Context) {
+// @Router /api/vessel-pressures/{id} [put]
+func (h *Handler) ApiUpdateVesselPressure(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
@@ -421,8 +444,8 @@ func (h *Handler) ApiUpdateCalculation(ctx *gin.Context) {
 		return
 	}
 
-	// Проверяем, что заявка принадлежит текущему пользователю
-	item, _, err := h.Repository.GetCalculationDetail(uint(id))
+	// Проверяем, что давление сосуда принадлежит текущему пользователю
+	item, _, err := h.Repository.GetVesselPressureDetail(uint(id))
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -438,7 +461,7 @@ func (h *Handler) ApiUpdateCalculation(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
-	if err := h.Repository.UpdateCalculationFields(uint(id), req.Text, req.Status); err != nil {
+	if err := h.Repository.UpdateVesselPressureFields(uint(id), req.Text, req.Status); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -448,14 +471,14 @@ func (h *Handler) ApiUpdateCalculation(ctx *gin.Context) {
 // ApiSubmitCalculation godoc
 // @Summary Submit calculation
 // @Description Submit calculation for moderation
-// @Tags Calculations
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
 // @Param id path int true "Calculation ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/calculations/{id}/submit [post]
+// @Router /api/vessel-pressures/{id}/submit [post]
 func (h *Handler) ApiSubmitCalculation(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -469,76 +492,114 @@ func (h *Handler) ApiSubmitCalculation(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.Repository.SubmitCalculation(uint(id), creatorID); err != nil {
+	if err := h.Repository.SubmitVesselPressure(uint(id), creatorID); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
 
-// ApiCompleteCalculation godoc
-// @Summary Complete calculation (Moderator only)
-// @Description Mark calculation as completed
-// @Tags Calculations
+// ApiCompleteVesselPressure godoc
+// @Summary Complete vessel pressure (Moderator only)
+// @Description Mark vessel pressure as completed
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "Calculation ID"
+// @Param id path int true "Vessel Pressure ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
-// @Router /api/calculations/{id}/complete [put]
-func (h *Handler) ApiCompleteCalculation(ctx *gin.Context) {
+// @Router /api/vessel-pressures/{id}/complete [put]
+func (h *Handler) ApiCompleteVesselPressure(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
-	moderatorID := uint(2) // фиксированный модератор
-	if err := h.Repository.CompleteCalculation(uint(id), moderatorID); err != nil {
+	// Получаем ID модератора из JWT токена
+	moderatorID, err := h.getCreatorIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
+		return
+	}
+	if err := h.Repository.CompleteVesselPressure(uint(id), moderatorID); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
 
-// ApiRejectCalculation godoc
-// @Summary Reject calculation (Moderator only)
-// @Description Reject calculation
-// @Tags Calculations
+// ApiCalculateVesselPressure godoc
+// @Summary Calculate all gases in vessel pressure using async service (Moderator only)
+// @Description Send vessel pressure requests to async service for all gases in vessel pressure
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "Calculation ID"
+// @Param id path int true "Vessel Pressure ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/vessel-pressures/{id}/calculate [post]
+func (h *Handler) ApiCalculateVesselPressure(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	// Отправляем запросы в асинхронный сервис
+	sentCount, err := h.Repository.SendCalculationToAsyncService(uint(id))
+	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"vessel_pressure_id":  id,
+		"sent_to_service": sentCount,
+		"message":         "Давление сосуда отправлено в асинхронный сервис. Результаты будут доступны через несколько секунд.",
+	})
+}
+
+// ApiRejectVesselPressure godoc
+// @Summary Reject vessel pressure (Moderator only)
+// @Description Reject vessel pressure
+// @Tags VesselPressures
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Vessel Pressure ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
-// @Router /api/calculations/{id}/reject [put]
-func (h *Handler) ApiRejectCalculation(ctx *gin.Context) {
+// @Router /api/vessel-pressures/{id}/reject [put]
+func (h *Handler) ApiRejectVesselPressure(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 	moderatorID := uint(2)
-	if err := h.Repository.RejectCalculation(uint(id), moderatorID); err != nil {
+	if err := h.Repository.RejectVesselPressure(uint(id), moderatorID); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
 
-// ApiDeleteCalculation godoc
-// @Summary Delete calculation (logical)
-// @Description Delete calculation by ID
-// @Tags Calculations
+// ApiDeleteVesselPressure godoc
+// @Summary Delete vessel pressure (logical)
+// @Description Delete vessel pressure by ID
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "Calculation ID"
+// @Param id path int true "Vessel Pressure ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/calculations/{id} [delete]
-func (h *Handler) ApiDeleteCalculation(ctx *gin.Context) {
+// @Router /api/vessel-pressures/{id} [delete]
+func (h *Handler) ApiDeleteVesselPressure(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
@@ -552,8 +613,8 @@ func (h *Handler) ApiDeleteCalculation(ctx *gin.Context) {
 		return
 	}
 
-	// Проверяем, что заявка принадлежит текущему пользователю
-	item, _, err := h.Repository.GetCalculationDetail(uint(id))
+	// Проверяем, что давление сосуда принадлежит текущему пользователю
+	item, _, err := h.Repository.GetVesselPressureDetail(uint(id))
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -564,7 +625,7 @@ func (h *Handler) ApiDeleteCalculation(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.Repository.DeleteCalculation(uint(id)); err != nil {
+	if err := h.Repository.DeleteVesselPressure(uint(id)); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
@@ -573,11 +634,11 @@ func (h *Handler) ApiDeleteCalculation(ctx *gin.Context) {
 
 // ApiMMDelete godoc
 // @Summary Remove gas from draft
-// @Description Remove gas calculation entry from draft (by GasCalculation ID, not Gas ID)
-// @Tags Calculations
+// @Description Remove gas vessel pressure entry from draft (by GasVesselPressure ID, not Gas ID)
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "GasCalculation ID"
+// @Param id path int true "GasVesselPressure ID"
 // @Success 204
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -596,27 +657,27 @@ func (h *Handler) ApiMMDelete(ctx *gin.Context) {
 		return
 	}
 
-	// Проверяем, что GasCalculation принадлежит черновику текущего пользователя
-	var gasCalc ds.GasCalculation
+	// Проверяем, что GasVesselPressure принадлежит черновику текущего пользователя
+	var gasCalc ds.GasVesselPressure
 	if err := h.Repository.DB().First(&gasCalc, gasCalculationIDU64).Error; err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
 
-	// Проверяем, что расчет принадлежит текущему пользователю
-	var calculation ds.Calculation
-	if err := h.Repository.DB().First(&calculation, gasCalc.CalculationID).Error; err != nil {
+	// Проверяем, что давление сосуда принадлежит текущему пользователю
+	var vesselPressure ds.VesselPressure
+	if err := h.Repository.DB().First(&vesselPressure, gasCalc.VesselPressureID).Error; err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
 
-	if calculation.CreatorID != creatorID {
+	if vesselPressure.CreatorID != creatorID {
 		h.errorHandler(ctx, http.StatusForbidden, errors.New("access denied"))
 		return
 	}
 
-	// Удаляем запись GasCalculation по ее ID
-	if err := h.Repository.DB().Delete(&ds.GasCalculation{}, gasCalculationIDU64).Error; err != nil {
+	// Удаляем запись GasVesselPressure по ее ID
+	if err := h.Repository.DB().Delete(&ds.GasVesselPressure{}, gasCalculationIDU64).Error; err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -645,11 +706,11 @@ type apiMMUpdateReq struct {
 // ApiMMUpdate godoc
 // @Summary Update gas calculation fields
 // @Description Update gas calculation parameters (sound, quantity, position, calculation params)
-// @Tags Calculations
+// @Tags VesselPressures
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "GasCalculation ID"
+// @Param id path int true "GasVesselPressure ID"
 // @Param request body apiMMUpdateReq true "Update data"
 // @Success 204
 // @Failure 400 {object} map[string]string
@@ -669,20 +730,20 @@ func (h *Handler) ApiMMUpdate(ctx *gin.Context) {
 		return
 	}
 
-	// Проверяем, что GasCalculation принадлежит черновику текущего пользователя
-	var gasCalc ds.GasCalculation
+	// Проверяем, что GasVesselPressure принадлежит черновику текущего пользователя
+	var gasCalc ds.GasVesselPressure
 	if err := h.Repository.DB().First(&gasCalc, gasCalculationIDU64).Error; err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
 
-	var calculation ds.Calculation
-	if err := h.Repository.DB().First(&calculation, gasCalc.CalculationID).Error; err != nil {
+	var vesselPressure ds.VesselPressure
+	if err := h.Repository.DB().First(&vesselPressure, gasCalc.VesselPressureID).Error; err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
 		return
 	}
 
-	if calculation.CreatorID != creatorID {
+	if vesselPressure.CreatorID != creatorID {
 		h.errorHandler(ctx, http.StatusForbidden, errors.New("access denied"))
 		return
 	}
@@ -694,7 +755,7 @@ func (h *Handler) ApiMMUpdate(ctx *gin.Context) {
 		return
 	}
 
-	// Обновляем параметры расчета
+	// Обновляем параметры давления сосуда
 	params := map[string]interface{}{}
 	if req.Sound != nil {
 		params["sound"] = *req.Sound
@@ -729,7 +790,7 @@ func (h *Handler) ApiMMUpdate(ctx *gin.Context) {
 
 	if len(params) > 0 {
 		fmt.Printf("Updating gas calculation ID %d with params: %+v\n", gasCalculationIDU64, params)
-		if err := h.Repository.UpdateGasCalculationParams(uint(gasCalculationIDU64), params); err != nil {
+		if err := h.Repository.UpdateGasVesselPressureParams(uint(gasCalculationIDU64), params); err != nil {
 			// Логируем ошибку для отладки
 			fmt.Printf("Error updating gas calculation params (ID: %d): %v\n", gasCalculationIDU64, err)
 			h.errorHandler(ctx, http.StatusInternalServerError, err)
@@ -743,11 +804,11 @@ func (h *Handler) ApiMMUpdate(ctx *gin.Context) {
 // ApiMMUpdateResult godoc
 // @Summary Update gas calculation result from async service
 // @Description Update final_pressure from async calculation service (requires auth token)
-// @Tags Calculations
+// @Tags VesselPressures
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path int true "GasCalculation ID"
+// @Param id path int true "GasVesselPressure ID"
 // @Param request body apiMMUpdateResultReq true "Result data with auth token"
 // @Success 204
 // @Failure 400 {object} map[string]string
@@ -779,7 +840,7 @@ func (h *Handler) ApiMMUpdateResult(ctx *gin.Context) {
 		"final_pressure": req.FinalPressure,
 	}
 
-	if err := h.Repository.UpdateGasCalculationParams(uint(gasCalculationIDU64), params); err != nil {
+	if err := h.Repository.UpdateGasVesselPressureParams(uint(gasCalculationIDU64), params); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -796,14 +857,14 @@ func (h *Handler) UpdateAllGasParams(ctx *gin.Context) {
 		return
 	}
 
-	calculation, err := h.Repository.GetDraftCalculation(creatorID)
+	vesselPressure, err := h.Repository.GetDraftVesselPressure(creatorID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Обновляем параметры для каждого газа
-	for _, gasCalc := range calculation.Gases {
+	for _, gasCalc := range vesselPressure.Gases {
 		params := map[string]interface{}{}
 
 		gasIDStr := strconv.FormatUint(uint64(gasCalc.ID), 10)
@@ -836,7 +897,7 @@ func (h *Handler) UpdateAllGasParams(ctx *gin.Context) {
 
 		// Обновляем параметры если есть изменения
 		if len(params) > 0 {
-			if err := h.Repository.UpdateGasCalculationParams(gasCalc.ID, params); err != nil {
+			if err := h.Repository.UpdateGasVesselPressureParams(gasCalc.ID, params); err != nil {
 				h.errorHandler(ctx, http.StatusInternalServerError, err)
 				return
 			}
@@ -856,14 +917,14 @@ func (h *Handler) SaveAllGasParams(ctx *gin.Context) {
 		return
 	}
 
-	calculation, err := h.Repository.GetDraftCalculation(creatorID)
+	vesselPressure, err := h.Repository.GetDraftVesselPressure(creatorID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Сохраняем параметры для каждого газа
-	for _, gasCalc := range calculation.Gases {
+	for _, gasCalc := range vesselPressure.Gases {
 		params := map[string]interface{}{}
 
 		gasIDStr := strconv.FormatUint(uint64(gasCalc.ID), 10)
@@ -896,7 +957,7 @@ func (h *Handler) SaveAllGasParams(ctx *gin.Context) {
 
 		// Сохраняем параметры если есть изменения
 		if len(params) > 0 {
-			if err := h.Repository.UpdateGasCalculationParams(gasCalc.ID, params); err != nil {
+			if err := h.Repository.UpdateGasVesselPressureParams(gasCalc.ID, params); err != nil {
 				h.errorHandler(ctx, http.StatusInternalServerError, err)
 				return
 			}
@@ -907,40 +968,50 @@ func (h *Handler) SaveAllGasParams(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, "/journal?message=saved")
 }
 
-// ApiGetMyCalculations godoc
-// @Summary Get user's calculations
-// @Description Get list of calculations for authenticated user
-// @Tags Calculations
+// ApiGetMyVesselPressures godoc
+// @Summary Get user's vessel pressures
+// @Description Get list of vessel pressures for authenticated user
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {array} CalculationResponse
+// @Success 200 {array} VesselPressureResponse
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/my-calculations [get]
-func (h *Handler) ApiGetMyCalculations(ctx *gin.Context) {
-	userUUID, exists := ctx.Get("user_uuid")
+// @Router /api/my-vessel-pressures [get]
+func (h *Handler) ApiGetMyVesselPressures(ctx *gin.Context) {
+	userID, exists := ctx.Get("user_id")
 	if !exists {
 		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("user not authenticated"))
 		return
 	}
 
-	calculations, err := h.Repository.GetUserCalculations(userUUID.(string))
+	// Преобразуем userID в uint
+	var userIDValue uint
+	switch v := userID.(type) {
+	case uint:
+		userIDValue = v
+	case int:
+		userIDValue = uint(v)
+	case int64:
+		userIDValue = uint(v)
+	case float64:
+		userIDValue = uint(v)
+	default:
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("invalid user ID type"))
+		return
+	}
+
+	vesselPressures, err := h.Repository.GetUserVesselPressures(userIDValue)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
-	// Получаем ID пользователя для нумерации заявок
-	userObj, err := h.Repository.GetUserByUUID(userUUID.(string))
-	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
-		return
-	}
-	creatorID := userObj.ID
+	creatorID := userIDValue
 
 	// Преобразуем в DTO с газами
-	var response []CalculationResponse
-	for _, calc := range calculations {
+	var response []VesselPressureResponse
+	for _, calc := range vesselPressures {
 		// Получаем номер заявки для пользователя
 		calcNumber, err := h.Repository.GetCalculationNumber(creatorID, calc.ID)
 		if err != nil {
@@ -948,15 +1019,24 @@ func (h *Handler) ApiGetMyCalculations(ctx *gin.Context) {
 			calcNumber = int(calc.ID)
 		}
 
+		// Подсчитываем количество газов с рассчитанным давлением
+		calculatedCount := 0
+		for _, gasCalc := range calc.Gases {
+			if gasCalc.FinalPressure.Valid && gasCalc.FinalPressure.Float64 > 0 {
+				calculatedCount++
+			}
+		}
+
 		// Газы уже загружены через Preload в GetUserCalculations
-		response = append(response, CalculationResponse{
+		response = append(response, VesselPressureResponse{
 			ID:                calc.ID,
 			Status:            calc.Status,
 			Text:              calc.Text.String,
 			DateCreate:        calc.DateCreate,
 			CreatorID:         calc.CreatorID,
-			CalculationNumber: calcNumber,
-			Gases:             convertGasCalculationsToDTO(calc.Gases),
+			VesselPressureNumber: calcNumber,
+			CalculatedCount:   calculatedCount,
+			Gases:             convertGasVesselPressuresToDTO(calc.Gases),
 		})
 	}
 
@@ -966,7 +1046,7 @@ func (h *Handler) ApiGetMyCalculations(ctx *gin.Context) {
 // ApiGetMyDraft godoc
 // @Summary Get user's draft calculation
 // @Description Get current user's draft calculation with gases
-// @Tags Calculations
+// @Tags VesselPressures
 // @Produce json
 // @Security BearerAuth
 // @Success 200 {object} CalculationDetailDTO
@@ -981,31 +1061,83 @@ func (h *Handler) ApiGetMyDraft(ctx *gin.Context) {
 		return
 	}
 
-	// Получаем черновик расчета с газами
-	calculation, err := h.Repository.GetDraftCalculation(creatorID)
+	// Получаем черновик давления сосуда с газами
+	vesselPressure, err := h.Repository.GetDraftVesselPressure(creatorID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Преобразуем в DTO без sql.Null типов
-	response := CalculationDetailDTO{
-		ID:                 calculation.ID,
-		Status:             calculation.Status,
-		Text:               calculation.Text.String,
-		DateCreate:         calculation.DateCreate,
-		DateForm:           nullTimeToPointer(calculation.DateForm),
-		DateComplete:       nullTimeToPointer(calculation.DateComplete),
-		CreatorID:          calculation.CreatorID,
-		ModeratorID:        calculation.ModeratorID,
-		InitialPressure:    nullFloat64ToFloat(calculation.InitialPressure),
-		InitialTemperature: nullFloat64ToFloat(calculation.InitialTemperature),
-		FinalTemperature:   nullFloat64ToFloat(calculation.FinalTemperature),
-		Volume:             nullFloat64ToFloat(calculation.Volume),
-		GasAmount:          nullFloat64ToFloat(calculation.GasAmount),
-		FinalPressure:      nullFloat64ToFloat(calculation.FinalPressure),
-		GasesCount:         len(calculation.Gases),
-		Gases:              convertGasCalculationsToDTO(calculation.Gases),
+	response := VesselPressureDetailDTO{
+		ID:                 vesselPressure.ID,
+		Status:             vesselPressure.Status,
+		Text:               vesselPressure.Text.String,
+		DateCreate:         vesselPressure.DateCreate,
+		DateForm:           nullTimeToPointer(vesselPressure.DateForm),
+		DateComplete:       nullTimeToPointer(vesselPressure.DateComplete),
+		CreatorID:          vesselPressure.CreatorID,
+		ModeratorID:        vesselPressure.ModeratorID,
+		InitialPressure:    nullFloat64ToFloat(vesselPressure.InitialPressure),
+		InitialTemperature: nullFloat64ToFloat(vesselPressure.InitialTemperature),
+		FinalTemperature:   nullFloat64ToFloat(vesselPressure.FinalTemperature),
+		Volume:             nullFloat64ToFloat(vesselPressure.Volume),
+		GasAmount:          nullFloat64ToFloat(vesselPressure.GasAmount),
+		FinalPressure:      nullFloat64ToFloat(vesselPressure.FinalPressure),
+		GasesCount:         len(vesselPressure.Gases),
+		Gases:              convertGasVesselPressuresToDTO(vesselPressure.Gases),
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+// ApiGetMyDrafts godoc
+// @Summary Get all user's draft calculations
+// @Description Get all current user's draft calculations with gases
+// @Tags VesselPressures
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} CalculationDetailDTO
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/my-drafts [get]
+func (h *Handler) ApiGetMyDrafts(ctx *gin.Context) {
+	// Получаем ID пользователя из JWT токена
+	creatorID, err := h.getCreatorIDFromContext(ctx)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusUnauthorized, err)
+		return
+	}
+
+	// Получаем ВСЕ черновики давления сосуда пользователя
+	vesselPressures, err := h.Repository.GetAllDraftVesselPressures(creatorID)
+	if err != nil {
+		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Преобразуем в массив DTO
+	var response []VesselPressureDetailDTO
+	for _, vesselPressure := range vesselPressures {
+		dto := VesselPressureDetailDTO{
+			ID:                 vesselPressure.ID,
+			Status:             vesselPressure.Status,
+			Text:               vesselPressure.Text.String,
+			DateCreate:         vesselPressure.DateCreate,
+			DateForm:           nullTimeToPointer(vesselPressure.DateForm),
+			DateComplete:       nullTimeToPointer(vesselPressure.DateComplete),
+			CreatorID:          vesselPressure.CreatorID,
+			ModeratorID:        vesselPressure.ModeratorID,
+			InitialPressure:    nullFloat64ToFloat(vesselPressure.InitialPressure),
+			InitialTemperature: nullFloat64ToFloat(vesselPressure.InitialTemperature),
+			FinalTemperature:   nullFloat64ToFloat(vesselPressure.FinalTemperature),
+			Volume:             nullFloat64ToFloat(vesselPressure.Volume),
+			GasAmount:          nullFloat64ToFloat(vesselPressure.GasAmount),
+			FinalPressure:      nullFloat64ToFloat(vesselPressure.FinalPressure),
+			GasesCount:         len(vesselPressure.Gases),
+			Gases:              convertGasVesselPressuresToDTO(vesselPressure.Gases),
+		}
+		response = append(response, dto)
 	}
 
 	ctx.JSON(http.StatusOK, response)
@@ -1026,10 +1158,10 @@ func nullFloat64ToFloat(nf sql.NullFloat64) *float64 {
 	return nil
 }
 
-func convertGasCalculationsToDTO(gasCalcs []ds.GasCalculation) []GasCalculationDTO {
-	result := make([]GasCalculationDTO, len(gasCalcs))
-	for i, gc := range gasCalcs {
-		result[i] = GasCalculationDTO{
+func convertGasVesselPressuresToDTO(gasCalcs []ds.GasVesselPressure) []GasVesselPressureDTO {
+	result := make([]GasVesselPressureDTO, len(gasCalcs))
+		for i, gc := range gasCalcs {
+		result[i] = GasVesselPressureDTO{
 			ID:                 gc.ID,
 			GasID:              gc.GasID,
 			Sound:              gc.Sound,
@@ -1057,54 +1189,64 @@ func convertGasCalculationsToDTO(gasCalcs []ds.GasCalculation) []GasCalculationD
 // ApiCreateCalculation godoc
 // @Summary Create calculation
 // @Description Create a new calculation
-// @Tags Calculations
+// @Tags VesselPressures
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body CreateCalculationRequest true "Calculation data"
-// @Success 201 {object} CalculationResponse
+// @Param request body CreateVesselPressureRequest true "Vessel pressure data"
+// @Success 201 {object} VesselPressureResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /api/calculations [post]
-func (h *Handler) ApiCreateCalculation(ctx *gin.Context) {
-	userUUID, exists := ctx.Get("user_uuid")
+// @Router /api/vessel-pressures [post]
+func (h *Handler) ApiCreateVesselPressure(ctx *gin.Context) {
+	userID, exists := ctx.Get("user_id")
 	if !exists {
 		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("user not authenticated"))
 		return
 	}
 
-	var req CreateCalculationRequest
+	var req CreateVesselPressureRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.errorHandler(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	user, err := h.Repository.GetUserByUUID(userUUID.(string))
-	if err != nil {
-		h.errorHandler(ctx, http.StatusNotFound, err)
+	// Преобразуем userID в uint
+	var userIDValue uint
+	switch v := userID.(type) {
+	case uint:
+		userIDValue = v
+	case int:
+		userIDValue = uint(v)
+	case int64:
+		userIDValue = uint(v)
+	case float64:
+		userIDValue = uint(v)
+	default:
+		h.errorHandler(ctx, http.StatusUnauthorized, errors.New("invalid user ID type"))
 		return
 	}
 
-	calculation := &ds.Calculation{
+	vesselPressure := &ds.VesselPressure{
 		Status:     "draft",
 		Text:       sql.NullString{String: req.Text, Valid: req.Text != ""},
 		DateCreate: time.Now(),
-		CreatorID:  user.ID,
+		CreatorID:  userIDValue,
 	}
 
-	err = h.Repository.CreateCalculation(calculation)
+	err := h.Repository.CreateVesselPressure(vesselPressure)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	// Возвращаем DTO
-	ctx.JSON(http.StatusCreated, CalculationResponse{
-		ID:         calculation.ID,
-		Status:     calculation.Status,
-		Text:       calculation.Text.String,
-		DateCreate: calculation.DateCreate,
-		CreatorID:  calculation.CreatorID,
+	ctx.JSON(http.StatusCreated, VesselPressureResponse{
+		ID:         vesselPressure.ID,
+		Status:     vesselPressure.Status,
+		Text:       vesselPressure.Text.String,
+		DateCreate: vesselPressure.DateCreate,
+		CreatorID:  vesselPressure.CreatorID,
 	})
 }

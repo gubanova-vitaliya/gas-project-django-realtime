@@ -1,0 +1,307 @@
+.calculation-page {
+  padding: 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.calculation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding: 12px 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.calculation-title-section {
+  flex: 1;
+}
+
+.calculation-header h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  color: white;
+}
+
+.calculation-date {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 4px;
+}
+
+.calculation-date strong {
+  color: white;
+}
+
+.calculation-count {
+  display: flex;
+  align-items: center;
+}
+
+.count-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.count-badge strong {
+  color: white;
+  font-size: 0.9rem;
+}
+
+.calculation-content {
+  margin-top: 15px;
+}
+
+.calculation-data-view {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  border-left: 3px solid #4680C2;
+}
+
+.calculation-data-view h4 {
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.calculation-data-edit {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e0e0;
+}
+
+.calculation-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.gases-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.gases-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.gases-count-badge {
+  background: #e7f3ff;
+  color: #4680C2;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.gases-count-badge strong {
+  color: #4680C2;
+  font-size: 0.9rem;
+}
+
+.calculation-gas-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.calculation-gas-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.gas-number {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #4680C2;
+  margin-right: 8px;
+  background: #e7f3ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.gas-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-right: 8px;
+}
+
+.gas-formula {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+.gas-molar-mass {
+  font-size: 0.8rem;
+  color: #888;
+  background: #f8f9fa;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.parameters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.param-group {
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.param-group:hover {
+  background: #f0f0f0;
+  border-color: #4680C2;
+}
+
+.param-group label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.result-display {
+  padding: 6px;
+  background: white;
+  border-radius: 4px;
+  text-align: center;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e0e0;
+}
+
+.final-pressure-value {
+  color: #28a745;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.not-calculated {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.75rem;
+}
+
+.gas-calculations-form {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.gas-calculations-view {
+  margin-top: 10px;
+}
+
+.no-gases {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.no-gases p {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .calculation-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .calculation-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .gases-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .parameters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}

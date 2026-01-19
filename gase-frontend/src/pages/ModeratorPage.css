@@ -1,0 +1,24 @@
+.moderator-page {
+  padding: 20px;
+}
+
+.page-title {
+  margin-bottom: 30px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.no-calculations {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+
+
+

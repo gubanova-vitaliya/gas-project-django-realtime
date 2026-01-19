@@ -10,15 +10,13 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios'; // Axios для HTTP-запросов
 import { getDestApi } from '../../target_config';
-import { clearCalculation } from './calculationSlice';
+import { clearVesselPressure } from './vesselPressureSlice';
 import { clearFilters, setSearchValue } from './gasSlice';
 
 interface UserProfile {
+  id?: number;
   login?: string;
-  name?: string;
-  email?: string;
-  uuid?: string;
-  role?: string;
+  is_moderator?: boolean;
 }
 
 /**
@@ -86,10 +84,15 @@ export const loginUserAsync = createAsyncThunk(
       // Эти данные будут доступны в action.payload в extraReducers
       return {
         username: response.data.user?.login || credentials.login,
-        name: response.data.user?.name || '',
-        email: response.data.user?.email || '',
-        uuid: response.data.user?.uuid || '',
-        token: response.data.access_token,
+        name: '',
+        email: '',
+        uuid: '',
+        token: response.data.access_token || response.data.accessToken,
+        profile: {
+          id: response.data.user?.id,
+          login: response.data.user?.login,
+          is_moderator: response.data.user?.is_moderator || false,
+        },
       };
     } catch (error: any) {
       // При ошибке возвращаем отклонённое значение
@@ -109,20 +112,14 @@ export const loginUserAsync = createAsyncThunk(
  */
 export const registerUserAsync = createAsyncThunk(
   'user/registerUserAsync',
-  async (data: { login: string; password: string; name: string; email?: string }, { rejectWithValue }) => {
+  async (data: { login: string; password: string }, { rejectWithValue }) => {
     try {
       const apiBase = getDestApi();
-      // Формируем объект запроса, включая email только если он есть
-      const requestData: any = {
+      // Формируем объект запроса
+      const requestData = {
         login: data.login,
         password: data.password,
-        name: data.name,
       };
-      
-      // Добавляем email только если он не пустой
-      if (data.email && data.email.trim() !== '') {
-        requestData.email = data.email.trim();
-      }
       
       // Axios POST с явным указанием заголовков
       // Третий параметр - конфигурация запроса (headers, params, timeout и т.д.)
@@ -286,12 +283,10 @@ const userSlice = createSlice({
       // FULFILLED: запрос успешно выполнен
       // action.payload содержит данные, возвращённые из async функции в createAsyncThunk
       .addCase(loginUserAsync.fulfilled, (state, action) => {
-        state.username = action.payload.username; // Данные из response.data
-        state.name = action.payload.name;
-        state.email = action.payload.email;
-        state.uuid = action.payload.uuid;
+        state.username = action.payload.username;
         state.isAuthenticated = true;
         state.token = action.payload.token;
+        state.profile = action.payload.profile || null;
         state.error = null;
         state.loading = false;
       })
@@ -320,13 +315,11 @@ const userSlice = createSlice({
       })
       .addCase(getUserProfileAsync.fulfilled, (state, action) => {
         state.profile = {
-          ...action.payload,
-          role: action.payload.role,
+          id: action.payload.id,
+          login: action.payload.login,
+          is_moderator: action.payload.is_moderator || false,
         };
         state.username = action.payload.login || '';
-        state.name = action.payload.name || '';
-        state.email = action.payload.email || '';
-        state.uuid = action.payload.uuid || '';
         state.loading = false;
       })
       .addCase(getUserProfileAsync.rejected, (state, action) => {

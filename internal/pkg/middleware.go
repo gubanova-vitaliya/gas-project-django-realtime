@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"WEB/internal/app/ds"
-	"WEB/internal/app/role"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -51,34 +50,33 @@ func (a *Application) SimpleAuthMiddleware() gin.HandlerFunc {
 
 		// Сохраняем claims в контекст
 		ctx.Set("jwt_claims", claims)
-		ctx.Set("user_uuid", claims.UserUUID.String())
-		ctx.Set("user_role", claims.Role)
+		ctx.Set("user_id", claims.UserID)
+		ctx.Set("is_moderator", claims.IsModerator)
 
-		logrus.Debugf("User %s with role %s authenticated", claims.UserUUID, claims.Role)
+		logrus.Debugf("User ID %d authenticated, IsModerator: %v", claims.UserID, claims.IsModerator)
 		ctx.Next()
 	}
 }
 
-// RoleMiddleware middleware для проверки ролей
-func (a *Application) RoleMiddleware(allowedRoles ...role.Role) gin.HandlerFunc {
+// ModeratorMiddleware middleware для проверки прав модератора
+func (a *Application) ModeratorMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userRole, exists := ctx.Get("user_role")
+		isModerator, exists := ctx.Get("is_moderator")
 		if !exists {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User role not found"})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User authentication not found"})
 			ctx.Abort()
 			return
 		}
 
-		hasAccess := false
-		for _, allowedRole := range allowedRoles {
-			if userRole.(role.Role) == allowedRole {
-				hasAccess = true
-				break
-			}
+		moderatorStatus, ok := isModerator.(bool)
+		if !ok {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "Invalid moderator status"})
+			ctx.Abort()
+			return
 		}
 
-		if !hasAccess {
-			ctx.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
+		if !moderatorStatus {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions. Moderator access required."})
 			ctx.Abort()
 			return
 		}
