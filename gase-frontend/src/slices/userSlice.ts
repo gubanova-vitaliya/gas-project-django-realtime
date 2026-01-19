@@ -67,21 +67,15 @@ export const loginUserAsync = createAsyncThunk(
   async (credentials: { login: string; password: string }, { rejectWithValue }) => {
     try {
       const apiBase = getDestApi();
-      
-      // HTTP-запрос через Axios: POST запрос на эндпоинт /api/auth/login
-      // Axios автоматически сериализует объект в JSON и устанавливает заголовки
       const response = await axios.post(`${apiBase}/api/auth/login`, {
         login: credentials.login,
         password: credentials.password,
       });
       
-      // Сохраняем токен в localStorage для последующих запросов
       if (response.data.access_token) {
         localStorage.setItem('auth_token', response.data.access_token);
       }
       
-      // Возвращаем данные для fulfilled reducer
-      // Эти данные будут доступны в action.payload в extraReducers
       return {
         username: response.data.user?.login || credentials.login,
         name: '',
@@ -115,14 +109,11 @@ export const registerUserAsync = createAsyncThunk(
   async (data: { login: string; password: string }, { rejectWithValue }) => {
     try {
       const apiBase = getDestApi();
-      // Формируем объект запроса
       const requestData = {
         login: data.login,
         password: data.password,
       };
       
-      // Axios POST с явным указанием заголовков
-      // Третий параметр - конфигурация запроса (headers, params, timeout и т.д.)
       const response = await axios.post(`${apiBase}/api/auth/register`, requestData, {
         headers: {
           'Content-Type': 'application/json',
@@ -131,10 +122,8 @@ export const registerUserAsync = createAsyncThunk(
       
       return response.data;
     } catch (error: any) {
-      // Более детальная обработка ошибок
       let message = 'Ошибка регистрации';
       if (error.response) {
-        // Сервер вернул ответ с ошибкой
         if (error.response.data?.description) {
           message = error.response.data.description;
         } else if (error.response.data?.error) {
@@ -170,9 +159,7 @@ export const getUserProfileAsync = createAsyncThunk(
       if (!token) {
         return rejectWithValue('Нет токена авторизации');
       }
-      
-      // GET-запрос с токеном авторизации в заголовке
-      // Axios автоматически добавит заголовок Authorization: Bearer <token>
+
       const response = await axios.get(`${apiBase}/api/users/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -235,7 +222,6 @@ export const logoutUserAsync = createAsyncThunk(
       localStorage.removeItem('auth_token');
       return {};
     } catch (error: any) {
-      // Даже при ошибке удаляем токен
       localStorage.removeItem('auth_token');
       return rejectWithValue('Ошибка при выходе из системы');
     }

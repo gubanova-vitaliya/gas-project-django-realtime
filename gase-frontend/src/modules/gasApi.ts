@@ -18,9 +18,16 @@ const transformImageUrl = (imageUrl: string | null): string | null => {
     return null;
   }
   
+  // Если URL уже начинается с /api/minio/, просто добавляем базовый URL API
+  if (imageUrl.startsWith('/api/minio/')) {
+    const finalUrl = `${apiBase}${imageUrl}`;
+    console.debug('Image URL already in proxy format:', imageUrl, '→', finalUrl);
+    return finalUrl;
+  }
+  
   // Если это относительный URL (начинается с /)
   if (imageUrl.startsWith('/')) {
-    // Если это путь к MinIO через API прокси
+    // Если это путь к MinIO через API прокси (без /api/minio/)
     if (imageUrl.includes('/minio/') || imageUrl.includes('/gase/') || imageUrl.includes('/gases/')) {
       // Убираем ведущий слэш и формируем полный URL через API прокси
       const path = imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl;
@@ -124,7 +131,11 @@ export const getGases = async (filters?: GasFilters): Promise<Gas[]> => {
         );
       }
       console.log('📦 Returning mock data:', mockGases.length, 'gases');
-      return mockGases;
+      // Преобразуем URL изображений в mock данных через transformImageUrl
+      return mockGases.map(gas => ({
+        ...gas,
+        image_url: transformImageUrl(gas.image_url || null)
+      }));
     }
     
     // Всегда используем полный URL к API
@@ -149,15 +160,16 @@ export const getGases = async (filters?: GasFilters): Promise<Gas[]> => {
       headers: Object.fromEntries(response.headers.entries())
     });
     
-    // Если ошибка сервера, используем mock данные
+    // Если ошибка сервера, НЕ используем mock данные - выбрасываем ошибку
+    // Это гарантирует, что данные всегда берутся из бэкенда/БД, а не из mock
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
       console.error(`❌ API returned ${response.status}:`, errorText);
-      throw new Error(`API error: ${response.status}`);
+      throw new Error(`API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('📦 API Response data:', data);
+    console.log('📦 API Response data from backend/DB:', data);
     
     // Проверяем, что получили массив
     if (!Array.isArray(data)) {
@@ -165,16 +177,27 @@ export const getGases = async (filters?: GasFilters): Promise<Gas[]> => {
       throw new Error("Invalid response format");
     }
     
-    console.log(`✅ Successfully loaded ${data.length} gases from API`);
+    console.log(`✅ Successfully loaded ${data.length} gases from backend database`);
     
-    return data.map((gas: any) => ({
-      id: gas.ID || gas.id,
-      title: gas.Title || gas.title,
-      formula: gas.Formula || gas.formula,
-      molar_mass: gas.MolarMass || gas.molar_mass,
-      image_url: transformImageUrl(gas.ImageURL || gas.image_url),
-      description: gas.Description || gas.description,
-    }));
+    // Обрабатываем данные из БД - изображения уже нормализованы бэкендом
+    return data.map((gas: any) => {
+      const rawImageUrl = gas.ImageURL || gas.image_url;
+      const transformedUrl = transformImageUrl(rawImageUrl);
+      console.log(`🖼️ Gas ${gas.ID || gas.id} (${gas.Title || gas.title}) from DB:`, {
+        rawImageUrl,
+        transformedUrl,
+        apiBase: getDestApi()
+      });
+      return {
+        id: gas.ID || gas.id,
+        title: gas.Title || gas.title,
+        formula: gas.Formula || gas.formula,
+        molar_mass: gas.MolarMass || gas.molar_mass,
+        image_url: transformedUrl, // URL из БД, уже нормализован бэкендом
+        description: gas.Description || gas.description,
+        description_en: gas.DescriptionEn || gas.description_en, // Сохраняем английское описание если есть
+      };
+    });
   } catch (error: any) {
     // Перехватываем все ошибки: сетевые (ERR_CONNECTION_REFUSED), таймауты, 500, 404 и т.д.
     // Ошибка ERR_CONNECTION_REFUSED или 404 - это нормально, когда бэкенд не запущен или недоступен
@@ -208,7 +231,11 @@ export const getGases = async (filters?: GasFilters): Promise<Gas[]> => {
       );
     }
 
-    return mockGases;
+    // Преобразуем URL изображений в mock данных через transformImageUrl
+    return mockGases.map(gas => ({
+      ...gas,
+      image_url: transformImageUrl(gas.image_url || null)
+    }));
   }
 };
 
@@ -219,7 +246,12 @@ export const getGasById = async (id: number): Promise<Gas | null> => {
   if (!apiBase || apiBase === '') {
     console.info('API URL not configured, using mock data');
     const mockGas = GASES_MOCK.find((gas) => gas.id === id);
-    return mockGas || null;
+    if (!mockGas) return null;
+    // Преобразуем URL изображения через transformImageUrl
+    return {
+      ...mockGas,
+      image_url: transformImageUrl(mockGas.image_url || null)
+    };
   }
   
   // Если API URL установлен, пытаемся получить данные с бэкенда
@@ -235,22 +267,33 @@ export const getGasById = async (id: number): Promise<Gas | null> => {
       signal: AbortSignal.timeout(10000), // 10 секунд
     });
     
-    // Если ошибка сервера, используем mock данные
+    // Если ошибка сервера, НЕ используем mock данные - выбрасываем ошибку
+    // Это гарантирует, что данные всегда берутся из бэкенда/БД
     if (!response.ok) {
-      console.warn(`API returned ${response.status}, using mock data`);
-      throw new Error(`API error: ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      console.error(`❌ API returned ${response.status}:`, errorText);
+      throw new Error(`API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Successfully loaded gas from API:', data.title || data.Title);
+    console.log('Successfully loaded gas from backend database:', data.title || data.Title);
+    
+    const rawImageUrl = data.ImageURL || data.image_url;
+    const transformedUrl = transformImageUrl(rawImageUrl);
+    console.log(`🖼️ Gas ${data.ID || data.id} image URL from DB:`, {
+      rawImageUrl,
+      transformedUrl,
+      apiBase: getDestApi()
+    });
     
     return {
       id: data.ID || data.id,
       title: data.Title || data.title,
       formula: data.Formula || data.formula,
       molar_mass: data.MolarMass || data.molar_mass,
-      image_url: transformImageUrl(data.ImageURL || data.image_url),
+      image_url: transformedUrl, // URL из БД, уже нормализован бэкендом
       description: data.Description || data.description,
+      description_en: data.DescriptionEn || data.description_en, // Сохраняем английское описание если есть
     };
   } catch (error: any) {
     // Перехватываем все ошибки
@@ -272,6 +315,11 @@ export const getGasById = async (id: number): Promise<Gas | null> => {
     
     // Используем mock данные при ошибке
     const mockGas = GASES_MOCK.find((gas) => gas.id === id);
-    return mockGas || null;
+    if (!mockGas) return null;
+    // Преобразуем URL изображения через transformImageUrl
+    return {
+      ...mockGas,
+      image_url: transformImageUrl(mockGas.image_url || null)
+    };
   }
 };

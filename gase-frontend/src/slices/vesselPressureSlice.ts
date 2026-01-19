@@ -210,8 +210,7 @@ export const deleteGasFromVesselPressure = createAsyncThunk(
     try {
       const apiBase = getDestApi();
       const token = localStorage.getItem('auth_token');
-      
-      // Используем gasCalculationId (ID из таблицы GasCalculation), а не gasId
+  
       await axios.delete(`${apiBase}/api/mm/gas/${gasCalculationId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -246,7 +245,6 @@ export const getDraftVesselPressureAsync = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
-        // Черновик не найден - это нормально, вернем пустые данные
         return null;
       }
       return rejectWithValue('Ошибка при загрузке черновика');
@@ -275,7 +273,6 @@ export const getAllDraftsAsync = createAsyncThunk(
       return response.data || [];
     } catch (error: any) {
       if (error.response?.status === 404) {
-        // Черновики не найдены - это нормально, вернем пустой массив
         return [];
       }
       return rejectWithValue('Ошибка при загрузке черновиков');
@@ -292,7 +289,6 @@ export const getMyVesselPressuresAsync = createAsyncThunk(
       const token = localStorage.getItem('auth_token');
       
       if (!token) {
-        // Если нет токена, возвращаем пустой массив
         return [];
       }
       
@@ -302,10 +298,8 @@ export const getMyVesselPressuresAsync = createAsyncThunk(
         },
       });
       
-      // Убеждаемся, что возвращаем массив
       return Array.isArray(response.data) ? response.data : [];
     } catch (error: any) {
-      // Если ошибка 401 или 403, возвращаем пустой массив вместо ошибки
       if (error.response?.status === 401 || error.response?.status === 403) {
         return [];
       }
@@ -398,7 +392,6 @@ export const markVesselPressureAsFormed = createAsyncThunk(
       
       return appId;
     } catch (error: any) {
-      // Если такого эндпоинта нет, пробуем через PUT с изменением статуса
       try {
         const apiBase = getDestApi();
         const token = localStorage.getItem('auth_token');

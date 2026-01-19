@@ -24,6 +24,8 @@ export interface Gas {
   molar_mass: number;
   image_url?: string | null;
   description?: string;
+  description_en?: string; // Английское описание для вычисления эмбеддингов
+  embedding?: number[]; // Эмбеддинг описания
 }
 
 interface GasCardProps {
