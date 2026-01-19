@@ -156,8 +156,29 @@ const MyVesselPressuresPage: FC = () => {
     return new Date(year, month, day);
   };
 
-  // По умолчанию не устанавливаем фильтр по датам - показываем все заявки
-  // useEffect для установки дат удален - теперь по умолчанию пустые даты
+  // По умолчанию устанавливаем фильтр "за сегодня" для всех пользователей
+  useEffect(() => {
+    // Проверяем, что пользователь авторизован и профиль загружен
+    if (!isAuthenticated || !userProfile) {
+      return;
+    }
+
+    const today = formatDateToDDMMYYYY(new Date());
+    const todayYYYYMMDD = new Date().toISOString().split('T')[0]; // Формат YYYY-MM-DD
+    
+    // Устанавливаем даты только если они еще не установлены (при первой загрузке)
+    if (dateFromDisplay === '' && dateToDisplay === '') {
+      setDateFromDisplay(today);
+      setDateToDisplay(today);
+      
+      // Для модераторов также устанавливаем даты в формате YYYY-MM-DD для API
+      if (isModerator) {
+        setDateFrom(todayYYYYMMDD);
+        setDateTo(todayYYYYMMDD);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, userProfile, isModerator]); // Запускаем при загрузке профиля (не включаем dateFromDisplay/dateToDisplay чтобы избежать циклов)
 
   // Применяем фильтры
   // Для модераторов фильтрация происходит на бэкенде, поэтому просто используем данные как есть
